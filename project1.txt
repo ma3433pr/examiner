@@ -1,0 +1,5042 @@
+
+==============================
+FILE: src/App.tsx
+==============================
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
+
+import "./styles/global.css";
+
+export default function App() {
+  return (
+    <div className="app">
+      <RouterProvider router={router} />
+    </div>
+  );
+}
+==============================
+FILE: src/main.tsx
+==============================
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+
+import "@fontsource/vazirmatn";
+
+import "./styles/global.css";
+
+import App from "./App";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+==============================
+FILE: src/types/question.ts
+==============================
+export interface Question {
+
+  id: number;
+
+  question: string;
+
+  options: [
+    string,
+    string,
+    string,
+    string
+  ];
+
+  answer: number;
+
+}
+==============================
+FILE: src/types/course.ts
+==============================
+export interface Course {
+    id: string;
+    title: string;
+    code: string;
+    description: string;
+    questionsFile: string;
+  }
+==============================
+FILE: src/App.css
+==============================
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+==============================
+FILE: src/utils/score.ts
+==============================
+export function calculateScore(correct: number, total: number) {
+    return Math.round((correct / total) * 100);
+  }
+==============================
+FILE: src/utils/storage.ts
+==============================
+export const save = (key: string, value: unknown) => {
+    localStorage.setItem(key, JSON.stringify(value));
+  };
+  
+  export const load = <T>(key: string): T | null => {
+    const item = localStorage.getItem(key);
+  
+    if (!item) return null;
+  
+    return JSON.parse(item) as T;
+  };
+  
+  export const remove = (key: string) => {
+    localStorage.removeItem(key);
+  };
+==============================
+FILE: src/utils/exam.ts
+==============================
+export function isCorrect(answer: string, selected: string) {
+    return answer === selected;
+  }
+==============================
+FILE: src/index.css
+==============================
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  border-inline: 1px solid var(--border);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+==============================
+FILE: src/styles/global.css
+==============================
+@import "@fontsource/vazirmatn";
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+
+  --text: #182230;
+  --text-light: #7b8497;
+
+  --background: #eef2f7;
+
+  --card: #ffffff;
+  --border: #e8edf5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  font-family: "Vazirmatn", sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .08);
+}
+
+.page {
+  padding: 24px;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+  height: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.menu-btn {
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: #f4f5f7;
+  font-size: 22px;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.hero h2 {
+  font-size: 28px;
+  line-height: 1.7;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.hero p {
+  margin-top: 18px;
+  color: var(--text-light);
+  font-size: 14px;
+  line-height: 2;
+}
+
+/* ================= FEATURES ================= */
+
+.feature-card {
+  margin-top: 30px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.feature-item {
+  padding: 22px;
+}
+
+.feature-item:not(:last-child) {
+  border-bottom: 1px solid #edf2f7;
+}
+
+.feature-title{
+
+  display:flex;
+
+  flex-direction:row-reverse;
+
+  justify-content:flex-end;
+
+  align-items:center;
+
+  gap:14px;
+
+}
+
+.feature-title span:first-child {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.feature-desc{
+
+  margin-top:10px;
+
+  padding-right:26px;
+
+  color:var(--text-light);
+
+  font-size:13px;
+
+  line-height:2;
+
+  text-align:right;
+
+}
+
+/* ================= BUTTON ================= */
+
+.primary-btn{
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+  height:64px;
+
+  margin-top:30px;
+
+  border:none;
+  border-radius:20px;
+
+  background:linear-gradient(135deg,#2f80ed,#1d4ed8);
+
+  color:#fff;
+
+  font-size:20px;
+  font-weight:800;
+
+  box-shadow:0 12px 28px rgba(37,99,235,.28);
+
+}
+
+/* ================= CARD ================= */
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+}
+
+/* ================= DRAWER ================= */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 82%;
+  max-width: 320px;
+  height: 100vh;
+  background: #fff;
+  transform: translateX(100%);
+  transition: transform .25s ease;
+  z-index: 1000;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, .12);
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--border);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.drawer-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-menu a {
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width:430px) {
+
+  body {
+    background: #fff;
+  }
+
+  .app {
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+}
+
+/* ================= EXAM ================= */
+
+.question-counter {
+  margin-bottom: 18px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.progress {
+  width: 100%;
+  height: 10px;
+  margin-bottom: 28px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg,#2f80ed,#1d4ed8);
+  transition: width .25s;
+}
+
+.question-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.question-title {
+  margin-bottom: 26px;
+  line-height: 2;
+  font-weight: 800;
+  text-align: right;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.option {
+  width: 100%;
+  min-height: 62px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--text);
+  text-align: right;
+  line-height: 1.8;
+  transition: .2s;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.option.correct {
+  background: #ecfdf3;
+  border-color: #16a34a;
+  color: #166534;
+}
+
+.option.wrong {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.option.disabled {
+  opacity: .75;
+}
+
+.next-btn {
+  width: 100%;
+  height: 60px;
+  margin-top: 26px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg,#2f80ed,#1d4ed8);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(37,99,235,.25);
+}
+==============================
+FILE: src/styles/global۰.css
+==============================
+@import "@fontsource/vazirmatn";
+
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+
+  --text: #182230;
+  --text-light: #7b8497;
+
+  --background: #eef2f7;
+
+  --card: #ffffff;
+  --border: #e8edf5;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  font-family: "Vazirmatn", sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.app {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .08);
+}
+
+.page {
+  padding: 24px;
+}
+
+/* ================= HEADER ================= */
+
+.header {
+  height: 72px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.menu-btn {
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 14px;
+  background: #f4f5f7;
+  font-size: 24px;
+}
+
+/* ================= HERO ================= */
+
+.hero {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.hero h2 {
+  font-size: 30px;
+  line-height: 1.7;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.hero p {
+  margin-top: 18px;
+  color: var(--text-light);
+  font-size: 16px;
+  line-height: 2;
+}
+
+/* ================= FEATURES ================= */
+
+.feature-card {
+  margin-top: 30px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.feature-item {
+  padding: 22px;
+}
+
+.feature-item:not(:last-child) {
+  border-bottom: 1px solid #edf2f7;
+}
+
+.feature-title{
+
+  display:flex;
+
+  flex-direction:row-reverse;
+
+  justify-content:flex-end;
+
+  align-items:center;
+
+  gap:14px;
+
+}
+
+.feature-title span:first-child {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.feature-desc{
+
+  margin-top:10px;
+
+  padding-right:26px;
+
+  color:var(--text-light);
+
+  font-size:15px;
+
+  line-height:2;
+
+  text-align:right;
+
+}
+
+/* ================= BUTTON ================= */
+
+.primary-btn{
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  width:100%;
+  height:64px;
+
+  margin-top:30px;
+
+  border:none;
+  border-radius:20px;
+
+  background:linear-gradient(135deg,#2f80ed,#1d4ed8);
+
+  color:#fff;
+
+  font-size:22px;
+  font-weight:800;
+
+  box-shadow:0 12px 28px rgba(37,99,235,.28);
+
+}
+
+/* ================= CARD ================= */
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+}
+
+/* ================= DRAWER ================= */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 82%;
+  max-width: 320px;
+  height: 100vh;
+  background: #fff;
+  transform: translateX(100%);
+  transition: transform .25s ease;
+  z-index: 1000;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, .12);
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  border-bottom: 1px solid var(--border);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.drawer-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-menu a {
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width:430px) {
+
+  body {
+    background: #fff;
+  }
+
+  .app {
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+}
+
+/* ================= EXAM ================= */
+
+.question-counter {
+  margin-bottom: 18px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.progress {
+  width: 100%;
+  height: 10px;
+  margin-bottom: 28px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf2f7;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg,#2f80ed,#1d4ed8);
+  transition: width .25s;
+}
+
+.question-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.question-title {
+  margin-bottom: 26px;
+  line-height: 2;
+  font-weight: 800;
+  text-align: right;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.option {
+  width: 100%;
+  min-height: 62px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--text);
+  text-align: right;
+  line-height: 1.8;
+  transition: .2s;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+
+.option.correct {
+  background: #ecfdf3;
+  border-color: #16a34a;
+  color: #166534;
+}
+
+.option.wrong {
+  background: #fef2f2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.option.disabled {
+  opacity: .75;
+}
+
+.next-btn {
+  width: 100%;
+  height: 60px;
+  margin-top: 26px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg,#2f80ed,#1d4ed8);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(37,99,235,.25);
+}
+==============================
+FILE: src/components/Drawer/Drawer.tsx
+==============================
+type DrawerProps = {
+    open: boolean;
+    onClose: () => void;
+  };
+  
+  export default function Drawer({
+    open,
+    onClose,
+  }: DrawerProps) {
+    return (
+      <>
+        {open && (
+          <div
+            className="drawer-overlay"
+            onClick={onClose}
+          />
+        )}
+  
+        <aside className={`drawer ${open ? "open" : ""}`}>
+  
+          <div className="drawer-header">
+            Examiner
+          </div>
+  
+          <nav className="drawer-menu">
+  
+            <a href="/">
+              خانه
+            </a>
+  
+            <a href="/course/massage">
+              آزمون کاربر ماساژ
+            </a>
+  
+            <a href="#">
+              درباره برنامه
+            </a>
+  
+          </nav>
+  
+        </aside>
+      </>
+    );
+  }
+==============================
+FILE: src/components/Loading/Loading.tsx
+==============================
+
+==============================
+FILE: src/components/QuestionCard/QuestionCard.tsx
+==============================
+type Props = {
+    question: {
+      id: number;
+      question: string;
+      options: string[];
+      answer: number;
+    };
+  
+    current: number;
+    total: number;
+  
+    selected: number | null;
+    locked: boolean;
+  
+    onSelect: (index: number) => void;
+    onNext: () => void;
+  };
+  
+  export default function QuestionCard({
+    question,
+    current,
+    total,
+    selected,
+    locked,
+    onSelect,
+    onNext,
+  }: Props) {
+  
+    const progress = ((current + 1) / total) * 100;
+  
+    const getQuestionFontSize = () => {
+        const len = question.question.length;
+      
+        if (len > 180) return "12px";
+        if (len > 120) return "14px";
+        if (len > 80) return "16px";
+      
+        return "18px";
+      };
+  
+    const getOptionFontSize = (text: string) => {
+      if (text.length > 90) return "15px";
+      if (text.length > 60) return "16px";
+  
+      return "17px";
+    };
+  
+    const getClassName = (index: number) => {
+  
+      if (!locked) return "option";
+  
+      if (index === question.answer) {
+        return "option correct";
+      }
+  
+      if (
+        selected !== null &&
+        selected === index &&
+        selected !== question.answer
+      ) {
+        return "option wrong";
+      }
+  
+      return "option";
+    };
+  
+    return (
+      <>
+        <h2 className="question-counter">
+          سوال {current + 1} از {total}
+        </h2>
+  
+        <div className="progress">
+          <div
+            className="progress-fill"
+            style={{
+              width: `${progress}%`,
+            }}
+          />
+        </div>
+  
+        <div className="question-card">
+  
+          <h3
+            className="question-title"
+            style={{
+              fontSize: getQuestionFontSize(),
+            }}
+          >
+            {question.question}
+          </h3>
+  
+          <div className="options">
+  
+            {question.options.map((option, index) => (
+              <button
+                key={index}
+                type="button"
+                className={getClassName(index)}
+                disabled={locked}
+                onClick={() => onSelect(index)}
+                style={{
+                  fontSize: getOptionFontSize(option),
+                }}
+              >
+                {option}
+              </button>
+            ))}
+  
+          </div>
+  
+          {locked && (
+            <button
+              type="button"
+              className="next-btn"
+              onClick={onNext}
+            >
+              {current === total - 1
+                ? "مشاهده نتیجه"
+                : "سوال بعدی"}
+            </button>
+          )}
+  
+        </div>
+      </>
+    );
+  }
+==============================
+FILE: src/components/Layout/Layout.tsx
+==============================
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+
+import Header from "../Header/Header";
+import Drawer from "../Drawer/Drawer";
+
+export default function Layout() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  return (
+    <div className="app">
+
+      <Header
+        onMenu={() => setDrawerOpen(true)}
+      />
+
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      />
+
+      <main className="page">
+        <Outlet />
+      </main>
+
+    </div>
+  );
+}
+==============================
+FILE: src/components/Button/Button.tsx
+==============================
+
+==============================
+FILE: src/components/Modal/Modal.tsx
+==============================
+
+==============================
+FILE: src/components/CourseCard/CourseCard.tsx
+==============================
+
+==============================
+FILE: src/components/Header/Header.tsx
+==============================
+type HeaderProps = {
+  onMenu: () => void;
+};
+
+export default function Header({
+  onMenu,
+}: HeaderProps) {
+  return (
+    <header className="header">
+
+      <button
+        className="menu-btn"
+        onClick={onMenu}
+      >
+        ☰
+      </button>
+
+      <div className="logo">
+        Examiner
+      </div>
+
+    </header>
+  );
+}
+==============================
+FILE: src/data/massage.json
+==============================
+[
+  {
+    "id": 1,
+    "question": "کدام یک از موارد زیر جزء اصول قبل از شروع ماساژ می‌باشد؟",
+    "options": [
+      "Draping",
+      "پوشیدن دستکش",
+      "پخش روغن روی بدن",
+      "گرفتن ناخن ماسور"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 2,
+    "question": "دمای مناسب و رنگ نور لامپ اتاق ماساژ چگونه باید باشد؟",
+    "options": [
+      "۲۵ درجه سانتی‌گراد - قرمز",
+      "۲۳ الی ۲۶ درجه سانتی‌گراد - نور ملایم",
+      "۳۰ درجه سانتی‌گراد - آبی",
+      "۳۰ درجه سانتی‌گراد - ملایم"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 3,
+    "question": "استاندارد طول و عرض تخت ماساژ به ترتیب چند سانتی‌متر می‌باشد؟",
+    "options": [
+      "۲۰۰ - ۶۵ الی ۷۰",
+      "۲۰۰ - ۷۰ الی ۸۰",
+      "۱۵۰ - ۴۰ الی ۴۵",
+      "۱۹۰ - ۵۵ الی ۶۰"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 4,
+    "question": "چوب استیک ماساژ به چه دلیل و در چه تکنیک‌هایی استفاده می‌شود؟",
+    "options": [
+      "فشاری - پیشگیری از آسیب ماسور",
+      "نوازشی - پیشگیری از آسیب ماسور",
+      "ضربه‌ای - پیشگیری از آسیب ماسور",
+      "لرزشی - پیشگیری از آسیب ماسور"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 5,
+    "question": "تعریف سلامت چیست؟",
+    "options": [
+      "حالت رفاه کامل جسمانی، روانی و اجتماعی است",
+      "عدم وجود بیماری",
+      "حالت رفاه کامل جسمانی، روانی و اجتماعی نه صرفاً فقدان بیماری یا معلولیت",
+      "فردی که بتواند از پس کارهای روزمره خویش برآید"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 6,
+    "question": "تعریف انسان سالم کدام گزینه می‌باشد؟",
+    "options": [
+      "فردی که در مسیر درست زندگی قرار دارد",
+      "فردی که در مسیر رشد طبیعی قرار گرفته باشد",
+      "حالت رفاه کامل جسمانی، روانی و اجتماعی",
+      "صرفاً سلامت جسمانی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 7,
+    "question": "کدام یک از گزینه‌های زیر جزء شایع‌ترین بیماری‌های شغلی حرفه ماسور می‌باشد؟",
+    "options": [
+      "کمردرد",
+      "ناراحتی قلبی",
+      "ضعف بینایی",
+      "آسم"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 8,
+    "question": "کدام یک از موارد زیر جزء عوارض ناشی از فشار روحی و روانی در محیط کار نمی‌باشد؟",
+    "options": [
+      "فشار روحی",
+      "نارضایتی شغلی",
+      "افسردگی",
+      "آلرژی‌ها"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 9,
+    "question": "کدام یک از موارد زیر جزء عوامل اثرگذار بر سلامت شاغلین می‌باشد؟",
+    "options": [
+      "شیمیایی، فیزیکی، ارگونومیکی",
+      "وراثتی، اکتسابی، ارگونومیکی",
+      "فیزیکی، وراثتی، شیمیایی",
+      "ارگونومیکی، شیمیایی، وراثتی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 10,
+    "question": "کدام یک از موارد زیر جزء مهم‌ترین اصول مشتری‌مداری می‌باشد؟",
+    "options": [
+      "دریافت وجه قبل از انجام خدمات",
+      "نگهداری مشتری راحت‌تر از جذب مشتری است",
+      "مشتری حرف اول و آخر را می‌زند",
+      "احترام در همه جا برای همه مشتریان ضروری است"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 11,
+    "question": "بهترین روشی که می‌توان به بیماری‌های شخص ماساژگیرنده پی برد کدام است؟",
+    "options": [
+      "فرم شرح حال",
+      "مصاحبه حضوری",
+      "حین ماساژ",
+      "حالت ظاهری فرد ماساژگیرنده"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 12,
+    "question": "قدرت عضلانی چیست؟",
+    "options": [
+      "توانایی عضله جهت اعمال نیرو علیه یک مقاومت",
+      "جابجایی در واحد زمان",
+      "تغییرات سرعت در واحد زمان",
+      "توانایی در اکسیژن‌رسانی به عضلات حین کار"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 13,
+    "question": "کدام گزینه در مورد تمرینات PNF صحیح می‌باشد؟",
+    "options": [
+      "شامل تمرینات کششی و مقاومتی است",
+      "شامل تمرینات استقامتی و سرعتی است",
+      "شامل تمرینات چابکی است",
+      "شامل تمرینات سرعتی و چابکی است"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 14,
+    "question": "تمرینات اینتروال به چه معناست؟",
+    "options": [
+      "تمرینات متناوب",
+      "تمرینات قدرتی",
+      "تمرینات سرعتی",
+      "تمرینات انعطاف‌پذیری"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 15,
+    "question": "کدام یک از تمرینات زیر جزء انواع تمرینات کششی نمی‌باشد؟",
+    "options": [
+      "کششی پرتابی",
+      "ایزومتریک",
+      "PNF",
+      "فارتلک (دویدن طولانی مدت)"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 16,
+    "question": "کدام یک از گزینه‌های زیر سریع‌ترین و مؤثرترین روش توسعه انعطاف‌پذیری ایستا و غیرفعال است؟",
+    "options": [
+      "حرکات کششی پرتابی",
+      "PNF",
+      "ایزومتریک",
+      "حرکات کششی پویا"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 17,
+    "question": "کدام گزینه در مورد تعادل صحیح نیست؟",
+    "options": [
+      "به دو نوع ایستا و پویا تقسیم می‌شود",
+      "تعادل ایستا مانند اجرای حرکت لی‌لی",
+      "به معنی حفظ بدن در فضا است",
+      "تعادل پویا مانند حرکت بارفیکس یا پارالل"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 18,
+    "question": "کدام یک از موارد زیر از روش‌های آرام‌سازی ذهنی نمی‌باشد؟",
+    "options": [
+      "تصویرسازی ذهنی",
+      "مدیتیشن",
+      "یوگا",
+      "یومی‌هو"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 19,
+    "question": "کدام گزینه در زمینه تصویرسازی ذهنی صحیح نمی‌باشد؟",
+    "options": [
+      "یک تکنیک مدیتیشن است",
+      "با تمرکز بر جسم باعث کاهش ضربان قلب، فشار خون و تغییر امواج مغزی می‌شود",
+      "تکنیکی روان‌شناختی است و تأثیری بر بهبود بیماری‌های جسمانی ندارد",
+      "سبب کاهش درد می‌شود"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 20,
+    "question": "کدام گزینه درباره تمرینات استقامتی صحیح نیست؟",
+    "options": [
+      "به دو دسته تمرینات هوازی و بی‌هوازی تقسیم می‌شوند",
+      "تمرینات هوازی با شدت پایین و مدت زمان طولانی انجام می‌شود",
+      "بدن طی تمرینات هوازی به طور پیوسته از اکسیژن استفاده می‌کند",
+      "تمرینات هوازی با شدت بالا و مدت زمان کوتاه انجام می‌شود"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 21,
+    "question": "استقامت عضلانی به چه معنی است؟",
+    "options": [
+      "توانایی ادامه دادن فعالیت بدنی را استقامت گویند",
+      "میزان جابه‌جایی در واحد زمان",
+      "توانایی عضله جهت اعمال نیرو علیه یک مقاومت",
+      "میزان سرعت در واحد زمان"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 22,
+    "question": "کدام گزینه در مورد تعریف استقامت قلبی عروقی صحیح است؟",
+    "options": [
+      "حداکثر تلاشی که یک فرد می‌تواند در مدتی طولانی اعمال کند و ظرفیت جذب اکسیژن و دفع دی‌اکسیدکربن محدود نشود.",
+      "توانایی عضلات برای تکرار یک حرکت معین در مقابل یک وزنه",
+      "توانایی یک گروه از عضلات برای انقباض مداوم یا متناوب در مدت طولانی",
+      "توانایی بدن یا قسمتی از بدن برای اعمال نیرو"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 23,
+    "question": "چابکی به چه معنا است؟",
+    "options": [
+      "میزان جابه‌جایی در واحد زمان",
+      "توانایی تغییر سریع و ناگهانی جهت حرکت و سرعت همراه با حفظ تعادل",
+      "میزان سرعت در واحد زمان",
+      "حداکثر دامنه حرکتی یک عضو"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 24,
+    "question": "کدام یک جزء سطوح اصلی بدن نیست؟",
+    "options": [
+      "ساجیتال",
+      "فرونتال",
+      "مرکز ثقل",
+      "هوریزنتال"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 25,
+    "question": "سطح عرضی یا فرونتال بدن را به دو نیمه ... و ... تقسیم می‌کند.",
+    "options": [
+      "بالایی - پایینی",
+      "جلویی - عقبی",
+      "چپ - راست",
+      "داخلی - خارجی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 26,
+    "question": "حرکت چرخش به داخل مچ دست چه نام دارد؟",
+    "options": [
+      "سوپینیشن",
+      "پروتراکشن",
+      "پرونیشن",
+      "ریتراکشن"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 27,
+    "question": "به نقطه تلاقی محورهای بدن چه می‌گویند؟",
+    "options": [
+      "مرکز ثقل",
+      "محور فرونتال",
+      "محور ساجیتال",
+      "محور ورتیکال"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 28,
+    "question": "کدام گزینه شامل مجموعه عضلات همسترینگ نمی‌باشد؟",
+    "options": [
+      "دوسر رانی",
+      "دوقلو",
+      "نیم‌وتری",
+      "نیم‌غشایی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 29,
+    "question": "کدام یک از عضلات زیر جزء عضلات بالاتنه است؟",
+    "options": [
+      "جناغی چنبری پستانی",
+      "ساقی قدامی",
+      "سرینی",
+      "همسترینگ"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 30,
+    "question": "تاندون آشیل کدام عضله را به استخوان پاشنه متصل می‌کند؟",
+    "options": [
+      "دوقلو",
+      "چهارسر",
+      "راست رانی",
+      "همسترینگ"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 31,
+    "question": "کدام مورد از مناطق گره‌های لنفاوی بدن نمی‌باشد؟",
+    "options": [
+      "زیر بغل",
+      "کشاله ران",
+      "پشت زانو",
+      "انگشتان دست"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 32,
+    "question": "به طور کلی دستگاه تنفس شامل چه بخش‌هایی می‌شود؟",
+    "options": [
+      "مجاری تنفسی - دیافراگم",
+      "مجاری تنفسی - دیافراگم",
+      "مجاری تنفسی - ریه‌ها",
+      "ریه‌ها - عضلات بین دنده‌ای"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 33,
+    "question": "کدام یک از گزینه‌های زیر وسیع‌ترین عضو زنده بدن می‌باشد؟",
+    "options": [
+      "عضلات",
+      "اعصاب",
+      "پوست",
+      "استخوان‌ها"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 34,
+    "question": "کدام یک از استخوان‌های زیر به مفصل زانو مرتبط است؟",
+    "options": [
+      "درشت‌نی",
+      "نازک‌نی",
+      "استخوان‌های میخی",
+      "پاشنه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 35,
+    "question": "حرکت فلکشن و آبداکشن به چه معنا است؟",
+    "options": [
+      "باز شدن و نزدیک شدن",
+      "خم شدن و دور شدن",
+      "خم شدن و نزدیک شدن",
+      "دور شدن و باز کردن"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 36,
+    "question": "کدام مورد درباره روغن اسطوخودوس صحیح نیست؟",
+    "options": [
+      "آرام‌بخش است",
+      "باعث کاهش تپش قلب می‌گردد",
+      "باعث کاهش فشار خون می‌گردد",
+      "سبب پیشگیری از ریزش مو می‌شود"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 37,
+    "question": "کدام یک از موارد زیر جزء ممنوعیت‌های ماساژ می‌باشد؟",
+    "options": [
+      "گرفتگی ناشی از ورزش",
+      "شکستگی",
+      "خستگی",
+      "افسردگی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 38,
+    "question": "کدام یک از تکنیک‌های ضربه‌ای زیر مناسب بیماران تنفسی می‌باشد؟",
+    "options": [
+      "کاردی",
+      "فنجانی",
+      "ضربه با حالت نیشگون",
+      "ریز ریز کردن"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 39,
+    "question": "میزان فشار ماساژ نوازشی در پشت بدن چگونه است؟",
+    "options": [
+      "کم",
+      "متوسط",
+      "شدید",
+      "بدون فشار"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 40,
+    "question": "مرحله آغازین ماساژ کدام یک از گزینه‌های زیر می‌باشد؟",
+    "options": [
+      "نوازشی",
+      "فشاری",
+      "ضربه‌ای",
+      "لرزشی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 41,
+    "question": "ستون مهره به ترتیب دارای چند مهره گردنی، پشتی و کمری می‌باشد؟",
+    "options": [
+      "شش - دوازده - پنج",
+      "هفت - دوازده - پنج",
+      "دوازده - شش - پنج",
+      "چهارده - سه - چهار"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 42,
+    "question": "کدام یک از استخوان‌های زیر جزء استخوان‌های پهن بدن نمی‌باشد؟",
+    "options": [
+      "کتف",
+      "لگن",
+      "جمجمه",
+      "ران"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 43,
+    "question": "کدام مورد از مناطق گره‌های لنفاوی بدن نمی‌باشد؟",
+    "options": [
+      "زیر بغل",
+      "کشاله ران",
+      "پشت زانو",
+      "انگشتان دست"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 44,
+    "question": "کدام یک از موارد زیر جزء مناطق تخلیه لنف نمی‌باشد؟",
+    "options": [
+      "پشت زانو",
+      "دو طرف گردن",
+      "کشاله ران",
+      "انگشتان دست"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 45,
+    "question": "به طور کلی دستگاه تنفس شامل چه بخش‌هایی می‌شود؟",
+    "options": [
+      "مجاری تنفسی - دیافراگم",
+      "مجاری تنفسی - عضلات بین دنده‌ای",
+      "مجاری تنفسی - ریه‌ها",
+      "ریه‌ها - عضلات بین دنده‌ای"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 46,
+    "question": "کدام یک از گزینه‌های زیر وسیع‌ترین عضو زنده بدن می‌باشد؟",
+    "options": [
+      "عضلات",
+      "اعصاب",
+      "پوست",
+      "استخوان‌ها"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 47,
+    "question": "کدام یک از گزینه‌های زیر جزء لایه‌های پوست نمی‌باشد؟",
+    "options": [
+      "اپیدرم",
+      "درم",
+      "هیپودرم",
+      "مزودرم"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 48,
+    "question": "هرگاه غذای مازاد نیاز بدن جذب شود، به چه صورت در بدن ذخیره می‌گردد؟",
+    "options": [
+      "پروتئین",
+      "چربی",
+      "آمینو اسید",
+      "کربوهیدرات"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 49,
+    "question": "تأثیر ماساژ بر دستگاه عضلانی چگونه است؟",
+    "options": [
+      "برطرف کردن سفتی مفاصل و درد آن",
+      "گردش خون و لنف",
+      "رفع گرفتگی",
+      "افزایش آرامش"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 50,
+    "question": "کدام یک از گزینه‌های زیر جزء استخوان‌های دراز نمی‌باشد؟",
+    "options": [
+      "لگن",
+      "ران",
+      "بازو",
+      "درشت‌نی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 51,
+    "question": "کدام یک از گزینه‌های زیر جزء تقسیم‌بندی انواع استخوان نمی‌باشد؟",
+    "options": [
+      "پهن",
+      "نامنظم",
+      "بلند",
+      "صفحات رشد"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 52,
+    "question": "بین استخوان‌های ستون مهره چه بافتی قرار دارد؟",
+    "options": [
+      "بافت غضروفی یا دیسک",
+      "بافت اسفنجی",
+      "بافت پیوندی",
+      "بافت غشایی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 53,
+    "question": "کدام یک از گزینه‌های زیر جزء عضلات خلفی پا می‌باشد؟",
+    "options": [
+      "همسترینگ",
+      "دوزنقه",
+      "سینه‌ای بزرگ",
+      "متوازی‌الاضلاع"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 54,
+    "question": "کدام یک از استخوان‌های زیر به مفصل زانو مرتبط است؟",
+    "options": [
+      "درشت‌نی",
+      "دوزنقه",
+      "استخوان‌های میخی",
+      "پاشنه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 55,
+    "question": "حرکت فلکشن حول کدام سطح انجام می‌شود؟",
+    "options": [
+      "فرونتال",
+      "ساجیتال",
+      "هوریزنتال",
+      "لترال (Lateral)"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 56,
+    "question": "حرکات فلکشن و آبداکشن به چه معنی هستند؟",
+    "options": [
+      "باز شدن و نزدیک شدن",
+      "خم شدن و دور شدن",
+      "خم شدن و نزدیک شدن",
+      "دور شدن و باز شدن"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 57,
+    "question": "ابداکشن و اداکشن به ترتیب به چه معنی هستند؟",
+    "options": [
+      "دور شدن و نزدیک شدن",
+      "باز کردن و خم کردن",
+      "خم شدن جانبی و باز شدن",
+      "نزدیک شدن و دور شدن"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 58,
+    "question": "عمقی‌ترین عضله ناحیه شکم کدام گزینه می‌باشد؟",
+    "options": [
+      "عرضی شکم",
+      "مورب شکمی",
+      "راست شکمی",
+      "مربع کمری"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 59,
+    "question": "بلندترین عضله بدن چه نام دارد؟",
+    "options": [
+      "خیاطه",
+      "راست شکمی",
+      "راست رانی",
+      "پهن داخلی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 60,
+    "question": "کدام گزینه از عضلات دیواره پشتی شکم است که شکلی نامنظم و چهار سر دارد؟",
+    "options": [
+      "متوازی‌الاضلاع",
+      "نیم غشایی",
+      "مربع کمری",
+      "ذوزنقه"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 61,
+    "question": "بزرگ‌ترین مفصل بدن چه نام دارد؟",
+    "options": [
+      "مفصل کتف و بازو",
+      "مفصل زانو",
+      "مفاصل انگشتان",
+      "مفصل ران و لگن"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 62,
+    "question": "مهم‌ترین وظیفه عضله چهار سر ران چیست؟",
+    "options": [
+      "صاف کردن زانو",
+      "خم کردن زانو",
+      "دور کننده ران",
+      "نزدیک کننده ران"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 63,
+    "question": "کدام گزینه شامل مجموعه عضلات چهار سر ران نمی‌باشد؟",
+    "options": [
+      "راست قدامی",
+      "نیم غشایی",
+      "پهن داخلی",
+      "پهن خارجی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 64,
+    "question": "غدد لنفاوی اندام فوقانی در کدام قسمت می‌باشد؟",
+    "options": [
+      "انگشتان",
+      "کف دست",
+      "زیر بغل",
+      "ساعد دست"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 65,
+    "question": "روغن مناسب جهت برطرف کردن جوش و آکنه‌ها چیست؟",
+    "options": [
+      "نارگیل",
+      "خشخاش",
+      "بابونه",
+      "جوجوبا"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 66,
+    "question": "از بارزترین خواص آلوئه‌ورا چیست؟",
+    "options": [
+      "آبرسانی و ترمیم",
+      "رفع گرفتگی عضله",
+      "کنترل قند خون و کلسترول",
+      "تقویت سیستم ایمنی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 67,
+    "question": "کدام مورد درباره روغن اسطوخودوس صحیح نیست؟",
+    "options": [
+      "آرام‌بخش است.",
+      "باعث کاهش تپش قلب می‌گردد.",
+      "باعث کاهش فشار خون می‌گردد.",
+      "سبب پیشگیری از ریزش مو می‌شود."
+    ],
+    "answer": 3
+  },
+  {
+    "id": 68,
+    "question": "کدام یک از موارد زیر جزء ممنوعیت‌های ماساژ می‌باشد؟",
+    "options": [
+      "گرفتگی ناشی از ورزش",
+      "شکستگی",
+      "خستگی",
+      "افسردگی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 69,
+    "question": "کدام یک از تکنیک‌های ضربه‌ای زیر مناسب بیماران تنفسی می‌باشد؟",
+    "options": [
+      "کاردی",
+      "فنجانی",
+      "ضربه با حالت نیشگون",
+      "ریز ریز کردن"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 70,
+    "question": "میزان فشار ماساژ نوازشی در پشت بدن چگونه است؟",
+    "options": [
+      "کم",
+      "متوسط",
+      "شدید",
+      "بدون فشار"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 71,
+    "question": "مرحله آغازین ماساژ کدام یک از گزینه‌های زیر می‌باشد؟",
+    "options": [
+      "نوازشی",
+      "فشاری",
+      "ضربه‌ای",
+      "لرزشی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 72,
+    "question": "اثر تکنیک نوازشی بر بدن چگونه است؟",
+    "options": [
+      "آرام‌بخشی",
+      "رفع گرفتگی",
+      "افزایش تنه عضله",
+      "دفع مواد زائد"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 73,
+    "question": "کدام یک از موارد زیر جزء ویژگی‌های فرم شرح حال مشتری نمی‌باشد؟",
+    "options": [
+      "اطلاعات کامل درباره بیماری‌ها",
+      "اطلاعات کامل درباره قیمت انواع خدمات",
+      "اطلاعات درباره میزان فشار دست ماسور",
+      "اطلاعات درباره قد، سن و اطلاعات فردی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 74,
+    "question": "کدام یک از موارد زیر جزء تکنیک فشاری نمی‌باشد؟",
+    "options": [
+      "پایه شست و سبابه",
+      "۴ به ۱",
+      "۱ به ۴",
+      "اره‌ای"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 75,
+    "question": "کدام یک از موارد زیر جزء اثرات مثبت ماساژ ضربه‌ای نمی‌باشد؟",
+    "options": [
+      "تحریک رفلکس انقباضی عضله",
+      "افزایش گردش خون",
+      "درمان آسیب‌دیدگی",
+      "بیدارسازی عضله"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 76,
+    "question": "تکنیک ضربه با نوک انگشتان در کدام گروه از افراد مناسب‌تر است؟",
+    "options": [
+      "ورزشکاران",
+      "جوانان",
+      "افراد سالم و عادی",
+      "کودکان و افراد سالمند"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 77,
+    "question": "برای انجام ماساژ کدام عضو از بدن دست‌ها را دوباره شسته و ضدعفونی می‌کنیم؟",
+    "options": [
+      "سر و صورت",
+      "پشت",
+      "دست‌ها",
+      "پاها"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 78,
+    "question": "کدام یک از حرکات زیر جزء تکنیک‌های ضربه‌ای نمی‌باشد؟",
+    "options": [
+      "شلاقی",
+      "ریز ریز کردن",
+      "ضربه با سینه مشت",
+      "دایره‌ای متحمل‌المرکز"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 79,
+    "question": "کدام گزینه در مورد ماساژ لرزشی صحیح است؟",
+    "options": [
+      "جهت تخلیه لنف انجام می‌شود.",
+      "جهت رفع گرفتگی‌ها و با فشار انجام می‌شود.",
+      "به دو نوع منطقه‌ای و عمومی تقسیم می‌شود.",
+      "جهت پخش روغن بر سطح پوست انجام می‌شود."
+    ],
+    "answer": 3
+  },
+  {
+    "id": 80,
+    "question": "کدام گزینه در مورد تکنیک‌های فشاری صحیح است؟",
+    "options": [
+      "از جمله این تکنیک‌ها ریز ریز کردن را می‌توان نام برد.",
+      "تکنیک‌ها با سرعت کم و فشار زیاد انجام می‌شود.",
+      "از تکنیک‌های فشاری، چنگکی را می‌توان نام برد.",
+      "تکنیک‌ها با سرعت زیاد و فشار کم انجام می‌شود."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 81,
+    "question": "کدام تکنیک ماساژ جهت مفاصل کاربرد دارد؟",
+    "options": [
+      "مالشی گاز انبری",
+      "مالشی رنده‌ای",
+      "مشت و مال گاز انبری",
+      "مشت و مال عادی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 82,
+    "question": "کدام تکنیک ماساژ جهت مفاصل کاربرد ندارد؟",
+    "options": [
+      "مالشی گاز انبری",
+      "مشت و مال",
+      "مالشی بریدن",
+      "نوازشی متحدالمرکز"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 83,
+    "question": "در تکنیک پایه شست و سبابه حرکت برگشت به چه صورت است؟",
+    "options": [
+      "نوک انگشتان",
+      "پشت دست",
+      "پایه شست و سبابه",
+      "کنار خارجی دست"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 84,
+    "question": "کدام ماساژ هم در طول و هم در عرض قابل اجرا است؟",
+    "options": [
+      "غلتیدن",
+      "گاز انبری",
+      "کششی",
+      "اره‌ای"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 85,
+    "question": "کدام گزینه از تکنیک‌های ماساژ ضربه‌ای نیست؟",
+    "options": [
+      "ضربه با سینه مشت",
+      "ضربه با پاشنه مشت",
+      "ماساژ جنباندن",
+      "شلاقی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 86,
+    "question": "انواع ماساژ لرزشی در کدام گزینه است؟",
+    "options": [
+      "ماساژ جنباندن، ماساژ با نوک انگشتان، ماساژ تکان دادن",
+      "ماساژ جنباندن، تکان دادن، نقطه‌ای",
+      "ماساژ نقطه‌ای، نوک انگشتان، متناوب",
+      "ماساژ جنباندن، ماساژ نقطه‌ای، ماساژ با سینه مشت"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 87,
+    "question": "جهت و طریقه قرار گرفتن ماسور در ماساژ ضربه‌ای و ماساژ لرزشی کدام است؟",
+    "options": [
+      "ماساژور در ماساژ ضربه‌ای در طول عضو و برای ماساژ لرزشی در عرض عضو قرار می‌گیرد.",
+      "ماساژور برای ماساژ ضربه‌ای در عرض عضو و در ماساژ لرزشی در طول عضو قرار می‌گیرد.",
+      "در هر دو ماساژ ماسور در طول عضو قرار می‌گیرد.",
+      "در هر دو ماساژ ماسور در عرض عضو قرار می‌گیرد."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 88,
+    "question": "کدام از تکنیک‌های ماساژ نوازشی نمی‌باشد؟",
+    "options": [
+      "متناوب",
+      "زیگزاگی",
+      "اره‌ای",
+      "اتویی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 89,
+    "question": "اثر کلی ماساژ نوازشی بر بدن چیست؟",
+    "options": [
+      "آرامش‌بخشی و پخش روغن",
+      "بالا بردن مایع مفصل",
+      "اثر بر سلول‌های چربی زیر پوست",
+      "فرم‌دهنده"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 90,
+    "question": "در کدام تکنیک ماساژ نوازشی بیشتر از یک نوع تکنیک استفاده می‌شود؟",
+    "options": [
+      "زیگزاگی",
+      "شانه‌ای",
+      "ترکیبی",
+      "متحدالمرکز"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 91,
+    "question": "کدام تکنیک زیر مجموعه ماساژ مشت و مال نیست؟",
+    "options": [
+      "با پنجه‌های دو دست",
+      "غلتاندن",
+      "کشش طولی",
+      "ریز ریز کردن"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 92,
+    "question": "ماساژ شانه‌ای به کدام یک از انواع ماساژ نزدیک می‌باشد؟",
+    "options": [
+      "اتویی",
+      "چنگکی",
+      "پایه شست و سبابه",
+      "اره‌ای"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 93,
+    "question": "زاویه ماساژ چنگکی چه مقدار است؟",
+    "options": [
+      "۱۰ تا ۴۵ درجه",
+      "۴۵ تا ۶۵ درجه",
+      "۶۵ تا ۷۵ درجه",
+      "۷۵ تا ۹۰ درجه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 94,
+    "question": "در شروع و پایان هر دوره ماساژ از کدام گروه ماساژ استفاده می‌شود؟",
+    "options": [
+      "نوازشی",
+      "مالشی",
+      "ضربه‌ای",
+      "فشاری"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 95,
+    "question": "در ماساژ مالشی چه اتفاقی می‌افتد؟",
+    "options": [
+      "مایع مفصلی درون مفاصل افزایش می‌یابد.",
+      "درد مفاصل زیاد می‌شود.",
+      "تورم از بین می‌رود.",
+      "تورم و درد زیاد می‌شود."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 96,
+    "question": "بین هر ماساژ مشت و مال از چه نوع ماساژی باید استفاده کرد؟",
+    "options": [
+      "ماساژ فشاری",
+      "لرزشی",
+      "نوازشی",
+      "ضربه‌ای"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 97,
+    "question": "ابتدایی‌ترین ساختار از سازمان پیچیده بدن را .......... می‌نامند.",
+    "options": [
+      "ارگان",
+      "سلول",
+      "بافت",
+      "حفره"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 98,
+    "question": "تمام سلول‌هایی را که یکسان هستند و یک وظیفه را به انجام می‌رسانند، .......... می‌گویند.",
+    "options": [
+      "بافت",
+      "اندام",
+      "عضو",
+      "دستگاه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 99,
+    "question": "ماساژ ضربه‌ای روی کدام عضو ممنوعیت دارد؟",
+    "options": [
+      "کلیه‌ها",
+      "پشت",
+      "صورت",
+      "کتف"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 100,
+    "question": "در هنگام ماساژ لرزشی تکان دادن، دست بیمار باید به چه صورت نگه داشته شود؟",
+    "options": [
+      "شل و آزاد",
+      "فرقی ندارد",
+      "خمیده",
+      "عمودی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 101,
+    "question": "در کدام نوع ماساژ با دست مشت شده به صورت مشت خوابیده روی عضو بیمار در حالت ریلکس ضربه وارد می‌کنیم؟",
+    "options": [
+      "ماساژ مشت و مال غلتیدن",
+      "ماساژ فشاری با مشت",
+      "ماساژ ضربه‌ای با پاشنه مشت",
+      "ماساژ ضربه‌ای با سینه مشت"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 102,
+    "question": "در این نوع ماساژ مشت و مال، عضله را حول استخوان می‌چرخانیم؟",
+    "options": [
+      "ماساژ با پنجه‌های دو دست",
+      "پیچیدن",
+      "فشاری",
+      "غلتیدن"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 103,
+    "question": "بعد از ماساژ فشاری در پشت، بلافاصله چه ماساژی انجام می‌شود؟",
+    "options": [
+      "ضربه‌ای",
+      "نوازشی",
+      "مشت و مال",
+      "ارتعاشی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 104,
+    "question": "ماساژ غلتیدن را روی چه اعضایی می‌توان انجام داد؟",
+    "options": [
+      "عضلات بازو، ران، شانه",
+      "مچ پا، شانه، بازو",
+      "ساق پا، ران، بازو",
+      "فرقی ندارد"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 105,
+    "question": "میزان فشار در ماساژ چگونه است؟",
+    "options": [
+      "ماساژ آرام شروع می‌شود و به اوج می‌رسد.",
+      "ماساژ با فشار زیاد شروع می‌شود و آرام تمام می‌شود.",
+      "ماساژ آرام شروع می‌شود و به اوج می‌رسد و به صورت آرام خاتمه می‌یابد.",
+      "فشار در تمام مدت زمان ماساژ یکسان است."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 106,
+    "question": "کدام گزینه برای ایجاد آمادگی و پخش روغن در ناحیه دست مناسب‌ترین تکنیک می‌باشد؟",
+    "options": [
+      "نوازشی مستقیم",
+      "مالشی شانه‌ای",
+      "رنده‌ای",
+      "پایه‌ای شست و سبابه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 107,
+    "question": "کدام گزینه برای انجام تکنیک فشاری در ناحیه خلفی یا پشتی ساق پا صحیح است؟",
+    "options": [
+      "طولی",
+      "تکنیک ۱ به ۴",
+      "غلتیدن",
+      "رنده‌ای"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 108,
+    "question": "کدام گزینه برای تکنیک‌های ضربه‌ای ماساژ صورت مناسب می‌باشد؟",
+    "options": [
+      "ضربه با نوک انگشت",
+      "ریز ریز کردن",
+      "مشت نیمه بسته با کنار مشت",
+      "ضربه‌ای مشت نیمه بسته با سینه مشت"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 109,
+    "question": "کدام گزینه تکنیک مناسب لرزشی برای پشت ساق پا می‌باشد؟",
+    "options": [
+      "جنباندن",
+      "گاز انبری",
+      "کششی",
+      "متناوب"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 110,
+    "question": "عواملی که باعث انتقال ویروس و بیماری‌های پوستی در مرکز ماساژ می‌شوند، کدامند؟",
+    "options": [
+      "فضای بسته اتاق و استفاده از عطرهای معطر",
+      "نداشتن تهویه مناسب و استفاده از بخاری",
+      "فضای بسته اتاق و نداشتن تهویه مناسب",
+      "استفاده از لباس آلوده و کولر آبی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 111,
+    "question": "بیماری‌های واگیردار را نام ببرید؟",
+    "options": [
+      "سرماخوردگی و شکستگی استخوان",
+      "زخم شدن قسمتی از بدن",
+      "زرد زخم، آبله‌مرغان، گال",
+      "خشکی پوست و قارچ پوستی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 112,
+    "question": "اگر اتاق ماساژ با سرامیک پوشیده شده باشد، سرامیک‌ها دارای چه نوع شرایطی باید باشند؟",
+    "options": [
+      "از سرامیک‌های بزرگ استفاده گردد و به صورت جدولی باید چیدمان شود.",
+      "باید سرامیک‌ها هم‌سطح و بدون ترک باشند و لیز هم نباشند.",
+      "از سرامیک‌های براق و لیز در اندازه‌های کوچک استفاده شود.",
+      "از سرامیک مات و هم‌سطح و روشن استفاده شود."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 113,
+    "question": "در هنگام ماساژ نوازشی، کف دست ماساژدهنده باید چگونه روی بدن قرار بگیرد؟",
+    "options": [
+      "باید هر دو دست به صورت عمودی روی بدن قرار بگیرد.",
+      "باید یک دست روی دست دیگر روی بدن قرار بگیرد.",
+      "باید دست ماساژدهنده با فشار طرفین روی بدن قرار بگیرد.",
+      "باید دست ماساژدهنده کاملاً روی سطح بدن بیمار قرار بگیرد."
+    ],
+    "answer": 3
+  },
+  {
+    "id": 114,
+    "question": "ماساژ به طریق چنگ زدن در چه قسمتی از بدن انجام می‌شود؟",
+    "options": [
+      "روی شانه‌ها انجام می‌شود و دست‌ها را به طرف بالا برده و با حرکات دورانی پایین می‌آوریم.",
+      "روی سر انجام می‌شود و دست‌ها را روی موهای سر قرار داده و موها را به طرف بالا و پایین حرکت می‌دهیم.",
+      "روی سر انجام می‌شود و دست‌ها را زیر موی سر برده و پوست را به طرف پایین و بالا به حالت کششی حرکت می‌دهیم.",
+      "روی تمامی قسمت‌های بدن می‌توان حرکت را انجام داد و بدن را به طرفین حرکت می‌دهیم."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 115,
+    "question": "برای کودکان و نوزادان از چه نوع روغنی باید استفاده شود؟",
+    "options": [
+      "از روغن‌های همراه با ژل بچه یا روغن بادام، روغن خردل یا ترکیبی از هر دو",
+      "از روغن‌های حیوانی یا روغن بادام و روغن خردل یا ترکیبی از هر دو",
+      "از روغن‌های معدنی یا روغن بادام و روغن خردل یا ترکیبی از هر دو روغن",
+      "روغن بادام شیرین"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 116,
+    "question": "در بدن انسان چند نوع عضله وجود دارد؟",
+    "options": [
+      "عضله صاف، عضله مخطط، عضله قلب",
+      "عضله صاف، عضله ارادی، عضله حرکتی",
+      "عضله صاف، عضله ثابت، عضله قلبی",
+      "عضله حرکتی، عضله ارادی، عضله قلبی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 117,
+    "question": "کلاژن چه خاصیتی دارد؟",
+    "options": [
+      "غیر متحرک",
+      "کششی",
+      "ثابتی",
+      "متحرکی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 118,
+    "question": "هنگام ورود مشتری چه مواردی را باید رعایت کنیم؟",
+    "options": [
+      "سکوت کردن و مرتب بودن",
+      "شرایط مکان را برایش باز کنیم",
+      "خوشرویی و خیر مقدم و معرفی خود",
+      "او را به طرف صندوق هدایت کنیم"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 119,
+    "question": "تخت ماساژ باید دارای چه ویژگی باشد؟",
+    "options": [
+      "کوتاه و پهن و محکم باشد.",
+      "ارتفاع تخت باید متناسب با قد ماسور باشد.",
+      "از نظر قد ۱۲۰ سانتی‌متر و از نظر طول ۲۰۰ سانتی‌متر باشد.",
+      "از نظر قد و اندازه می‌تواند دلخواه باشد."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 120,
+    "question": "ارگونومی به چه معنی است؟",
+    "options": [
+      "به معنی تقویت حافظه در کار",
+      "به معنی راهبرد صحیح اجرای ماساژ",
+      "به معنی اصلاح صحیح روابط اجتماعی",
+      "به معنی به‌کارگیری اصول و قوانین بیومکانیکی کار جهت پیشگیری از آسیب"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 121,
+    "question": "برای سالن ماساژ از چه نورهایی استفاده می‌شود؟",
+    "options": [
+      "نورهای سفید",
+      "نورهای ملایم",
+      "نورهای تند",
+      "نورهای خورشیدی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 122,
+    "question": "دلیل یاری ماسور در هنگام قرار گرفتن روی تخت و برخاستن ماساژگیرنده چیست؟",
+    "options": [
+      "باعث جلوگیری از حالت تهوع در مشتری می‌گردد.",
+      "باعث حفظ تعادل مشتری و احساس ایمنی بیشتر می‌شود.",
+      "باعث اعتماد به نفس مشتری می‌شود.",
+      "جلوگیری از عرق کردن مشتری"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 123,
+    "question": "نظافت بدن از چه طریقی روزانه انجام می‌شود؟",
+    "options": [
+      "اسپری",
+      "عطر",
+      "لوسیون",
+      "استحمام"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 124,
+    "question": "یکی از روش‌هایی که جهت آرام‌سازی ذهن و کمک به ماساژدهنده استفاده می‌شود، کدام است؟",
+    "options": [
+      "کوه‌نوردی",
+      "شنا",
+      "اسکی",
+      "مدیتیشن"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 125,
+    "question": "اسکلت اصلی بدن از چه چیزی تشکیل شده است؟",
+    "options": [
+      "مویرگ",
+      "عضله",
+      "عصب",
+      "استخوان"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 126,
+    "question": "استخوان‌های دراز را نام ببرید؟",
+    "options": [
+      "ستون فقرات، بازو، استخوان ساعد",
+      "استخوان بازو، ساعد، ران، درشت‌نی",
+      "استخوان کف پا و کف دست و بازو و ساعد",
+      "استخوان ران، مچ پا، ساعد، بازو"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 127,
+    "question": "دلیل عدم استفاده از زیورآلات در هنگام کار چیست؟",
+    "options": [
+      "مانع راحت کار کردن ماساژدهنده می‌شود.",
+      "در محل کار امنیت لازم را ندارد.",
+      "حواس ماساژدهنده را منحرف می‌کند.",
+      "باعث حواس‌پرتی ماساژگیرنده می‌شود."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 128,
+    "question": "ماساژدهنده جهت تأیید سلامت خود چه مدرکی را جهت اطمینان مشتری باید داشته باشد؟",
+    "options": [
+      "داشتن کارت بین‌المللی",
+      "داشتن مدرک دانشگاهی",
+      "داشتن کارت بهداشت",
+      "داشتن مدرک تجربی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 129,
+    "question": "محیط سرد در هنگام ماساژ چه تأثیر و واکنشی ایجاد می‌نماید؟",
+    "options": [
+      "باعث کاهش دمای بدن ماساژگیرنده می‌شود.",
+      "باعث خستگی بیش از حد ماساژدهنده می‌شود.",
+      "باعث کاهش دمای بدن و سرعت واکنش‌های عضلانی ماسور و ماساژگیرنده می‌شود.",
+      "باعث افزایش جریان خون در مویرگ‌های عصبی می‌شود."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 130,
+    "question": "نام محل اتصال دو یا چند استخوان را در بدن چیست؟",
+    "options": [
+      "غضروف",
+      "تاندون",
+      "مفصل",
+      "اسکلت"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 131,
+    "question": "کوچک‌ترین جزء یک عضله مخطط چیست؟",
+    "options": [
+      "سلول عضلانی",
+      "سلول ترکیبی",
+      "سلول تکثیری",
+      "سلول خونی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 132,
+    "question": "پوست از چند لایه تشکیل شده است؟ نام ببرید؟",
+    "options": [
+      "از دو لایه اپیدرم و مزودرم",
+      "از سه لایه اپیدرم، درم و هیپودرم",
+      "از دو لایه اپ و درم",
+      "از دو لایه اپیدرم و چربی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 133,
+    "question": "ماساژهای نوازشی با چه ریتمی و چند بار در دقیقه انجام می‌شود؟",
+    "options": [
+      "با ریتم ۳۰ و ۳۵ حرکت در دقیقه",
+      "با ریتم ۴۰ و ۴۵ حرکت در دقیقه",
+      "با ریتم ۵۰ و ۵۵ حرکت در دقیقه",
+      "با ریتم ۵۰ و ۶۵ حرکت در دقیقه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 134,
+    "question": "مشت و مال طولی در کدام قسمت بدن انجام می‌شود؟",
+    "options": [
+      "در قسمت بازو و ران انجام می‌شود.",
+      "در قسمت آرنج و بازو انجام می‌شود.",
+      "در قسمت زانو و ران انجام می‌شود.",
+      "در قسمت شانه و گردن انجام می‌شود."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 135,
+    "question": "برای آرامش صورت از چه روغن‌هایی استفاده می‌کنیم؟",
+    "options": [
+      "روغن جامد",
+      "روغن گیاهی",
+      "روغن معدنی",
+      "روغن ترکیبی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 136,
+    "question": "برای مکانی که صدای صوتی وارد فضای کار ماساژ می‌شود، چه می‌کنیم؟",
+    "options": [
+      "اتاق را عوض می‌کنیم.",
+      "جابجایی مکان انجام می‌دهیم.",
+      "جداره‌های ورودی را پر می‌کنیم.",
+      "از گوشی‌های مخصوص استفاده می‌کنیم."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 137,
+    "question": "محیط گرم در هنگام ماساژ چه تأثیری بر ماسور دارد؟",
+    "options": [
+      "باعث پایین آمدن سرعت واکنش‌های حرکتی ماسور می‌شود.",
+      "باعث کاهش تأثیر روغن‌های ماساژ می‌شود.",
+      "باعث تحرک و نیروی بیشتر در ماسور می‌شود.",
+      "باعث هوشیاری ماساژگیرنده می‌شود."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 138,
+    "question": "کف‌پوش اتاق ماساژ باید چگونه باشد؟",
+    "options": [
+      "قابل شستشو",
+      "نرم و قابل انعطاف",
+      "سفت و محکم",
+      "تفاوتی ندارد"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 139,
+    "question": "بافت‌های چربی، غضروفی و استخوانی از کدام‌یک از انواع بافت هستند؟",
+    "options": [
+      "پوششی",
+      "عصبی",
+      "عضلانی",
+      "پیوندی"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 140,
+    "question": "کدام گزینه برای جعبه کمک‌های اولیه ضروری است؟",
+    "options": [
+      "محلول بتادین",
+      "کرم ضد آفتاب",
+      "کرم مرطوب‌کننده",
+      "داروهای آرام‌بخش"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 141,
+    "question": "کامل‌ترین گزینه در مورد اهداف ماساژ کدام است؟",
+    "options": [
+      "جسمانی",
+      "روانی",
+      "جسمانی - روانی - اقتصادی",
+      "جسمانی - روانی"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 142,
+    "question": "استخوان بازو در کدام گروه از استخوان‌ها قرار می‌گیرد؟",
+    "options": [
+      "کوتاه",
+      "بلند",
+      "پهن",
+      "نامنظم"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 143,
+    "question": "کامل‌ترین گزینه در مورد خستگی عضلانی کدام است؟",
+    "options": [
+      "عدم توانایی در استمرار تولید نیروی لازم جهت انجام دادن فعالیت فیزیکی",
+      "میزان توانایی در استمرار تولید نیروی لازم جهت انجام دادن فعالیت فیزیکی",
+      "عدم توانایی در تولید نیرو",
+      "عدم توانایی جهت انجام فعالیت فیزیکی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 144,
+    "question": "یکی از شرایط محیط مناسب برای مراجعه‌کننده به سالن ماساژ چیست؟",
+    "options": [
+      "محیط شلوغ و پر هیجان",
+      "محیط فانتزی",
+      "محیط با دکور مدرن",
+      "محیط آرام و بی‌سر و صدا"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 145,
+    "question": "در چه شرایطی می‌توان درخواست مراجعه‌کننده را رد کرد؟",
+    "options": [
+      "نیازی نیست که به درخواست مراجعه‌کننده اهمیت دهیم.",
+      "درخواست برخلاف میل شما باشد.",
+      "تحت هیچ شرایطی نباید درخواست مراجعه‌کننده را رد کرد.",
+      "درخواست برای مراجعه‌کننده زیان‌بار باشد."
+    ],
+    "answer": 3
+  },
+  {
+    "id": 146,
+    "question": "چه نوع موسیقی برای اتاق ماساژ مناسب است؟",
+    "options": [
+      "به دلخواه مراجعه‌کننده",
+      "بهتر است داخل اتاق ماساژ سکوت باشد و موسیقی پخش نشود.",
+      "موسیقی ملایم بدون ضرب و ریتم",
+      "موسیقی کلاسیک"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 147,
+    "question": "کدام مورد در زمان مراجعه ماساژگیرنده به سالن ماساژ صحیح‌تر می‌باشد؟",
+    "options": [
+      "مراجعه‌کننده را مستقیماً به اتاق ماساژ هدایت کرده، پس از معرفی انواع ماساژها، وی را برای انجام ماساژ آماده می‌کنیم.",
+      "مراجعه‌کننده را به بخش پذیرش هدایت کرده، با انجام مشاوره صحیح و پر کردن فرم شرح حال، وی را به اتاق ماساژ هدایت می‌کنیم.",
+      "مراجعه‌کننده را به اتاق ماساژ هدایت کرده، پای مراجعه‌کننده را شسته و ماساژ را شروع می‌کنیم.",
+      "مراجعه‌کننده را به پذیرش هدایت کرده و پس از معرفی ماساژ و دریافت وجه ماساژ، وی را به اتاق ماساژ برده، پای وی را شسته و ماساژ را انجام می‌دهیم."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 148,
+    "question": "یکی از مسائلی که ماسور برای تمرکز در هنگام ماساژ باید رعایت کند، چیست؟",
+    "options": [
+      "رعایت ترتیب تکنیک‌ها",
+      "رعایت بهداشت",
+      "رعایت عدم صحبت کردن با مشتری",
+      "نزدیک بودن ظرف روغن"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 149,
+    "question": "درشت‌ترین قسمت یک مهره از ستون فقرات کدام است؟",
+    "options": [
+      "قوس خلفی",
+      "قوس قدامی",
+      "سوراخ مهره",
+      "تنه"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 150,
+    "question": "تعادل چیست؟",
+    "options": [
+      "به حالت ایستاده یک جسم گفته می‌شود.",
+      "به حالت خنثی یک جسم، ماده یا افراد گفته می‌شود.",
+      "به حالت عادی یک جسم، ماده یا افراد گفته می‌شود.",
+      "به اندازه بودن حالت یک جسم، ماده یا افراد گفته می‌شود."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 151,
+    "question": "حرکات کششی پویا کدامند؟",
+    "options": [
+      "حرکاتی که خود ورزشکار بدون نیروی خارجی انجام می‌دهد.",
+      "عضلات را در هیچ دامنه حرکتی، حرکت نمی‌دهد.",
+      "حرکات کششی اندام و افزایش تدریجی شدت و سرعت آن.",
+      "حرکاتی که توسط نیروی خارجی به ورزشکار اعمال می‌شوند."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 152,
+    "question": "از حرکات کششی پویا جهت چه کاری می‌توان استفاده کرد؟",
+    "options": [
+      "گرم کردن بعد از تمرینات غیرهوازی",
+      "گرم کردن بعد از تمرینات هوازی",
+      "سرد کردن",
+      "گرم کردن پیش از تمرینات"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 153,
+    "question": "اصل اضافه‌بار از اصول مهم کدام‌یک از تمرینات زیر است؟",
+    "options": [
+      "تمرینات فارتلک",
+      "تمرینات PNF",
+      "تمرینات با وزنه یا قدرتی",
+      "تمرینات استقامتی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 154,
+    "question": "به توانایی بدن در اکسیژن‌رسانی به عضلات در حال تحرک جهت انجام فعالیت جسمانی چه می‌گویند؟",
+    "options": [
+      "استقامت عضلانی",
+      "استقامت قلبی عروقی",
+      "هماهنگی عصب و عضله",
+      "قدرت عضلانی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 155,
+    "question": "تمرینات ایزومتریک به چه صورت است؟",
+    "options": [
+      "عضلات در دامنه حرکتی، حرکت داده می‌شوند.",
+      "تمریناتی که بیش از دو دقیقه انجام می‌شوند.",
+      "تمرینات به صورت ایستا و بدون حرکت دامنه‌ای عضله.",
+      "عضلات خارج از دامنه حرکتی، حرکت داده می‌شوند."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 156,
+    "question": "تفاوت تاندون و رباط کدام است؟",
+    "options": [
+      "هر دو عضله را به استخوان متصل می‌کنند.",
+      "تاندون عضله را به استخوان و رباط استخوان را به استخوان متصل می‌کند.",
+      "هر دو استخوان‌ها را به هم متصل می‌کنند.",
+      "رباط عضله را به استخوان و تاندون استخوان را به استخوان متصل می‌کند."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 157,
+    "question": "مفصل شانه از کنار هم قرار گرفتن کدام استخوان‌ها درست شده است؟",
+    "options": [
+      "اسکاپولا، هومروس، کلاویکل",
+      "رادیوس، اولنا، کلاویکل",
+      "اسکاپولا، هومروس، اولنا",
+      "هومروس، کلاویکل، رادیوس"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 158,
+    "question": "مفصل آرنج از کنار هم قرار گرفتن کدام استخوان‌ها درست شده است؟",
+    "options": [
+      "زند زیرین، زند زبرین، بازو",
+      "درشت‌نی، نازک‌نی، بازو",
+      "زند زیرین، زند زبرین، کتف",
+      "درشت‌نی، نازک‌نی، ران"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 159,
+    "question": "بلندترین عصب در بدن کدام است؟",
+    "options": [
+      "رانی",
+      "رکبی",
+      "سیاتیک",
+      "نازک‌نی مشترک"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 160,
+    "question": "Palmar در آناتومی به چه معنی است؟",
+    "options": [
+      "کف پا",
+      "کف دست",
+      "پشت دست",
+      "پشت پا"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 161,
+    "question": "آناتومی به چه معنی است؟",
+    "options": [
+      "ساختارهای بدن از ریزمولکول تا اعضای قابل رؤیت",
+      "کارکرد دستگاه‌ها و اندام‌های داخلی بدن",
+      "ساختار قابل رؤیت بدن از قبیل اسکلت و عضلات",
+      "کارکرد اسکلت بدن و عضلات"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 162,
+    "question": "کدام یک از استخوان‌های زیر جزء استخوان‌های نامنظم به شمار می‌آید؟",
+    "options": [
+      "مچ پا",
+      "ستون فقرات",
+      "کشکک زانو",
+      "زند زیرین"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 163,
+    "question": "چند جفت دنده وجود دارد؟",
+    "options": [
+      "۱۲ جفت",
+      "۲۳ جفت",
+      "۱۰ جفت",
+      "۲۵ جفت"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 164,
+    "question": "تعداد دنده‌های کاذب چند عدد است؟",
+    "options": [
+      "۳",
+      "۶",
+      "۲",
+      "۴"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 165,
+    "question": "تعداد استخوان‌های یک فرد بزرگسال چند عدد است؟",
+    "options": [
+      "۳۰۷",
+      "۲۰۶",
+      "۱۲۴",
+      "۱۱۴"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 166,
+    "question": "تعداد استخوان‌های مچ پا چند عدد است؟",
+    "options": [
+      "۸",
+      "۷",
+      "۴",
+      "۲"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 167,
+    "question": "الاستین چه خاصیتی دارد؟",
+    "options": [
+      "غیر متحرک",
+      "ارتجاعی",
+      "متحرک",
+      "ثابت"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 168,
+    "question": "دستگاه عصبی بدن از چند قسمت تشکیل شده است؟",
+    "options": [
+      "دو قسمت: مرکزی و پیرامونی",
+      "سه قسمت: مغزی، نخاعی، محیطی",
+      "چهار قسمت: مغزی، نخاعی، مرکزی، پیرامونی",
+      "پنج قسمت: مغزی، نخاعی، مرکزی، پیرامونی، محیطی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 169,
+    "question": "فعالیت عصب سمپاتیک به چه شکل است؟",
+    "options": [
+      "حرکات معده و روده را سریع می‌کند.",
+      "حرکات معده و روده را آرام می‌کند.",
+      "حرکات عضلات را آرام می‌کند.",
+      "مردمک چشم را تنگ می‌کند."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 170,
+    "question": "نازک‌ترین و ضخیم‌ترین قسمت پوست در بدن کدام است؟",
+    "options": [
+      "کف دست، کف پا",
+      "پلک چشم، پاشنه پا",
+      "صورت، کف پا",
+      "لب، پاشنه پا"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 171,
+    "question": "دریچه‌های لانه‌کبوتری در کدام بخش قرار دارند؟",
+    "options": [
+      "داخل سرخرگ",
+      "داخل سیاهرگ",
+      "داخل مویرگ",
+      "داخل سرخرگ، سیاهرگ و مویرگ"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 172,
+    "question": "نام فارسی عضله Deltoid کدام است؟",
+    "options": [
+      "عضله دالی",
+      "عضله تحت‌ترقوه‌ای",
+      "سینه‌ای کوچک",
+      "عضله فوق‌خاری"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 173,
+    "question": "Dorsal در آناتومی به چه معنی است؟",
+    "options": [
+      "کف دست",
+      "پشت دست",
+      "کف پا",
+      "کنار پا"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 174,
+    "question": "فلسفه ماساژ غربی بر چیست؟",
+    "options": [
+      "بر اساس طب غربی است و تمامی تکنیک‌ها با توجه به اصول آناتومیکی و فیزیولوژی است.",
+      "بر اساس طب غربی است و تمامی تکنیک‌ها با توجه به اصول خطوط انرژی طراحی شده است.",
+      "بر اساس پزشکی است و حرکات دست به سمت انتهای اندام‌ها جهت خروج انرژی منفی بنا شده است.",
+      "بر اساس طب غربی است و تمامی تکنیک‌ها با توجه به اصول آناتومیکی و خطوط انرژی طراحی شده است."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 175,
+    "question": "........ زائده‌ای است که در خلفی‌ترین قسمت مهره قرار دارد و در پشت انسان قابل لمس است.",
+    "options": [
+      "زائده مفصلی",
+      "زائده عرضی",
+      "زائده شوکی",
+      "رویه مفصلی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 176,
+    "question": "محل جراحی را تا چند وقت نباید به صورت فشاری ماساژ داد؟",
+    "options": [
+      "دو ماه",
+      "شش ماه",
+      "پنج سال",
+      "با توجه به نظر پزشک"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 177,
+    "question": "کدام یک از روغن‌های زیر جزء روغن‌های پایه هستند؟",
+    "options": [
+      "اسطوخودوس",
+      "بادام شیرین و کنجد",
+      "لیمو",
+      "رزماری"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 178,
+    "question": "ماساژ روسی کلاسیک جزء کدام یک از سبک‌های ماساژ می‌باشد؟",
+    "options": [
+      "غربی",
+      "شرقی",
+      "خشک",
+      "روغنی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 179,
+    "question": "کدام یک از روغن‌های زیر کاهش‌دهنده اضطراب و تنظیم‌کننده خواب است؟",
+    "options": [
+      "لیمو",
+      "نعناع",
+      "اسطوخودوس",
+      "رزماری"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 180,
+    "question": "کدام یک از روغن‌های زیر روی پوست لایه‌ای تشکیل داده و منجر به بسته شدن منافذ پوست می‌شود؟",
+    "options": [
+      "روغن جوجوبا",
+      "روغن فلفل",
+      "روغن خردل",
+      "روغن بچه"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 181,
+    "question": "کدام یک از حرکات زیر جزء تکنیک‌های ماساژ نوازشی می‌باشد؟",
+    "options": [
+      "متحدالمرکز",
+      "طولی",
+      "اره‌ای",
+      "بریلن"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 182,
+    "question": "کدام یک از حرکات زیر جزء تکنیک‌های ماساژ مالشی می‌باشد؟",
+    "options": [
+      "یک به چهار",
+      "زندهای با چهار انگشت",
+      "ترکیبی",
+      "پایه شست و سبابه"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 183,
+    "question": "ماساژ نوازشی مناسب بعد از ماساژ فشاری با مشت کدام است؟",
+    "options": [
+      "مستقیم",
+      "زیگزاگ",
+      "ترکیبی",
+      "متناوب"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 184,
+    "question": "ماساژ نوازشی مناسب بعد از ماساژ پایه شست و سبابه کدام است؟",
+    "options": [
+      "زیگزاگ",
+      "شانه‌ای",
+      "مستقیم",
+      "ترکیبی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 185,
+    "question": "ماساژ نوازشی مناسب بعد از ماساژ مشت و مال کششی، کدام نوع است؟",
+    "options": [
+      "متحدالمرکز",
+      "متناوب",
+      "مستقیم",
+      "ترکیبی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 186,
+    "question": "هرگاه ماساژ روی مفاصل انجام شود، ماساژ نوازشی بعد از آن ماساژ ........ است.",
+    "options": [
+      "چنگکی",
+      "شانه‌ای",
+      "متحدالمرکز",
+      "زیگزاگ"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 187,
+    "question": "در این تکنیک، دست بیمار را ثابت نگه داشته و با دست دیگر در حالی که مشت است به حالت ایستاده روی عضو بیمار قرار دارد، به حالت دایره‌ای از پایین به بالا و از بالا به پایین حرکت می‌کند.",
+    "options": [
+      "ماساژ فشاری با مشت",
+      "ماساژ فشاری با پاشنه دست",
+      "ماساژ ضربه‌ای با مشت",
+      "ماساژ ضربه‌ای با پاشنه مشت"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 188,
+    "question": "استخوان‌بندی محوری کدام قسمت را شامل نمی‌شود؟",
+    "options": [
+      "استخوان‌های اندام فوقانی",
+      "استخوان‌های قفسه سینه",
+      "استخوان‌های سر",
+      "استخوان‌های ستون فقرات"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 189,
+    "question": "مجموع استخوان‌های سر و صورت چند عدد است؟",
+    "options": [
+      "۲۲",
+      "۱۲",
+      "۳۲",
+      "۴۲"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 190,
+    "question": "در این تکنیک، ماسور در طول عضو بیمار از آرنج تا بازو قرار گرفته و با دو شست کنار هم بازو را گرفته و با حالت تکان دادن به بالا و پایین حرکت انجام می‌شود.",
+    "options": [
+      "مشت و مال طولی",
+      "مشت و مال با پنجه‌های دو دست",
+      "مشت و مال غلتیدن",
+      "مشت و مال عادی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 191,
+    "question": "استخوان کشکک زانو در کدام گروه از استخوان‌ها قرار می‌گیرد؟",
+    "options": [
+      "پهن",
+      "کوتاه",
+      "کنجدی",
+      "نامنظم"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 192,
+    "question": "کدام یک از تکنیک‌های زیر برای ماساژ سر مناسب است؟",
+    "options": [
+      "چنگ زدن خطی",
+      "چنگ زدن دایره‌ای",
+      "چنگ زدن دایره‌ای و مشت و مال عادی",
+      "چنگ زدن خطی و چنگ زدن دایره‌ای"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 193,
+    "question": "استخوان‌های مهره‌ها در کدام گروه از استخوان‌ها قرار می‌گیرند؟",
+    "options": [
+      "نامنظم",
+      "کوتاه",
+      "پهن",
+      "بلند"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 194,
+    "question": "استخوان‌های جمجمه، لگن و دنده‌ها در کدام گروه از استخوان‌ها قرار می‌گیرند؟",
+    "options": [
+      "پهن",
+      "کوتاه",
+      "بلند",
+      "نامنظم"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 195,
+    "question": "برای جلوگیری از ایجاد قارچ و باکتری‌های مضر در محیط کار، رعایت چه موردی اجباری است؟",
+    "options": [
+      "وجود تهویه در سالن ماساژ",
+      "استفاده از روغن‌های گیاهی",
+      "استفاده از دمایی در سالن ماساژ",
+      "استفاده از حوله روی تخت"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 196,
+    "question": "تعداد استخوان‌های هر یک از اندام تحتانی .......... قطعه بوده که توسط کمربند لگنی به استخوان‌بندی محوری متصل می‌شوند.",
+    "options": [
+      "۳۰",
+      "۲۵",
+      "۲۰",
+      "۱۵"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 197,
+    "question": ".......... زائده‌ای هستند در دو طرف هر مهره که از مهره به طرفین و عقب کشیده می‌شوند.",
+    "options": [
+      "زائده‌های مفصلی",
+      "زائده‌های خاری",
+      "زائده‌های شوکی",
+      "زائده‌های عرضی"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 198,
+    "question": "برای اطمینان بیشتر نسبت به ضدعفونی و تمیز بودن دست‌ها، چه محلولی توصیه می‌شود؟",
+    "options": [
+      "الکل",
+      "صابون‌های مایع و جامد",
+      "نانوسیل",
+      "آب"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 199,
+    "question": "تعداد مهره‌های پشتی یا سینه‌ای .......... عدد است؟",
+    "options": [
+      "۱۲",
+      "۱۱",
+      "۱۰",
+      "۱۳"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 200,
+    "question": "ماساژ چیست؟",
+    "options": [
+      "انجام حرکات منظم با دست روی بدن برای رسیدن به هدفی خاص",
+      "انجام حرکات تخصصی بر قسمت‌هایی از بدن که دچار خستگی و کوفتگی شده است.",
+      "انجام حرکات منظم روی بدن برای رسیدن به هدفی خاص",
+      "انجام حرکات با دست، روی بدن برای رسیدن به هدفی خاص"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 201,
+    "question": "از تعداد ۷ قطعه مهره گردنی، .......... مهره با توجه به وظیفه‌ای که دارند، از نظر شکل ظاهری با بقیه مهره‌ها تفاوت زیادی دارند.",
+    "options": [
+      "چهارمین و پنجمین",
+      "دومین و سومین",
+      "سومین و چهارمین",
+      "اولین و دومین"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 202,
+    "question": "تعداد مهره‌های کمری .......... عدد است؟",
+    "options": [
+      "۴",
+      "۵",
+      "۶",
+      "۷"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 203,
+    "question": "بیماری‌هایی که به علت مواجهه با عوامل فیزیکی، شیمیایی، بیولوژیکی یا ارگونومی محیط کار به وجود می‌آیند را چه می‌نامند؟",
+    "options": [
+      "بیماری‌های ناشی از کار",
+      "بیماری‌های مرتبط با کار",
+      "بیماری‌های بیولوژیک محیط کار",
+      "بیماری‌های ارگونومیک محیط کار"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 204,
+    "question": "استخوان کتف روی سطح .......... قفسه سینه قرار گرفته و بین .......... دنده را می‌پوشاند.",
+    "options": [
+      "قدامی، اولین تا پنجمین",
+      "خلفی، اولین تا هشتمین",
+      "قدامی، اولین تا هشتمین",
+      "خلفی، اولین تا پنجمین"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 205,
+    "question": "در فعالیت‌های دینامیک، عضلات در چه وضعیتی قرار دارند؟",
+    "options": [
+      "بدن به طور مطلق ثابت است.",
+      "عضلات به صورت متناوب منبسط و منقبض می‌شوند.",
+      "عضلات فعالیت زیادی ندارند.",
+      "عضلات در حالت منبسط قرار دارند."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 206,
+    "question": "تعداد استخوان‌های کف دست چند عدد است؟",
+    "options": [
+      "۵",
+      "۴",
+      "۷",
+      "۶"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 207,
+    "question": "کدام مورد از نشانه‌های درد ناشی از آسیب کمر است؟",
+    "options": [
+      "دردی که امکان دارد به جلو، کنارها یا عقب ساق پا تیر بکشد یا محدود به ناحیه تحتانی کمر باشد.",
+      "دردی که با فعالیت تسکین می‌یابد.",
+      "دردی که همراه با گزگز شدن یا ضعف در بخشی از کمر باشد.",
+      "دردی که در زمان خم شدن به عقب، ران یا نواحی کناری کمر را درگیر کرده باشد."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 208,
+    "question": "وضعیت بدن ماسور باید چه ویژگی‌هایی باشد؟",
+    "options": [
+      "پیروی از الگوی ایستادن کماندار (شمشیربازی) یا جنگجو (اسبی) با توجه به شرایط",
+      "استفاده از فشار بازو و مچ دست",
+      "به هر شیوه‌ای که ماسور احساس راحتی می‌کند",
+      "اعمال فشار روی ناحیه پایینی پشت و پاها"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 209,
+    "question": "رشته‌های مرتبط با ارگونومی کدامند؟",
+    "options": [
+      "پزشکی، روانشناسی صنعتی سازمانی، بیومکانیک شغلی، فیزیولوژی کار",
+      "ماساژ، آنتروپومتری، فیزیولوژی کار، بیومکانیک شغلی",
+      "آنتروپومتری، ماساژ، پزشکی، روانشناسی صنعتی سازمانی",
+      "بیومکانیک شغلی، روانشناسی صنعتی سازمانی، آنتروپومتری، فیزیولوژی کار"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 210,
+    "question": "کدام‌یک از جملات زیر صحیح نیست؟",
+    "options": [
+      "به طور کلی، لگن زن کوتاه‌تر و پهن‌تر می‌باشد.",
+      "مدخل لگن در زن گشادتر است.",
+      "سوراخ سیاتیک در مرد بیضی‌شکل و در زن مثلثی‌شکل است.",
+      "استخوان خاجی در مرد پهن‌تر است."
+    ],
+    "answer": 3
+  },
+  {
+    "id": 211,
+    "question": "مشخص شدن میزان رضایت مشتری از کار شما چه تأثیری دارد؟",
+    "options": [
+      "تأثیری ندارد.",
+      "روشن شدن راهی برای پیشرفت",
+      "مجاب کردن مشتری برای مراجعه مجدد",
+      "ارجاع مشتری به یک ماسور دیگر در صورت مراجعه مجدد"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 212,
+    "question": "بلندترین و قوی‌ترین استخوان بدن کدام است؟",
+    "options": [
+      "بازو",
+      "ساق پا",
+      "ساعد",
+      "ران"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 213,
+    "question": "علت قرار دادن گزینه بیماری خاص در فرم شرح حال چیست؟",
+    "options": [
+      "ممکن است بیماری واگیردار باشد.",
+      "ماساژ دادن افراد برای برخی بیماری‌ها خطرناک است.",
+      "صرفاً جهت اطلاع از حال مراجعه‌کننده",
+      "صرفاً جهت مطمئن کردن مراجعه‌کننده از روند ماساژ"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 214,
+    "question": "کدام مورد از مهم‌ترین وظایف مهندس بهداشت حرفه‌ای است؟",
+    "options": [
+      "تأمین، نگهداری و بالا بردن سلامت جسمانی، روانی و اجتماعی کارکنان در هر پیشه‌ای",
+      "به‌کارگیری فرد در کاری که از نظر فیزیولوژیکی و روانی توانایی انجام آن را داشته باشد.",
+      "تشکیل پرونده پزشکی کارکنان و بررسی وضعیت سلامتی آن‌ها",
+      "حفاظت کارکنان در برابر عواملی که برای تندرستی زیان‌آور هستند."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 215,
+    "question": "چند استخوان میخی در مچ پا وجود دارد؟",
+    "options": [
+      "4",
+      "1",
+      "3",
+      "2"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 216,
+    "question": "ساختمان مفصل .......... به گونه‌ای است که می‌تواند حول سه محور حرکتی حرکت داشته باشد.",
+    "options": [
+      "قرقره‌ای",
+      "کروی",
+      "زینی",
+      "لقمه‌ای"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 217,
+    "question": "یکی از عواملی که باعث کاهش آسیب‌های احتمالی به دست می‌شود چیست؟",
+    "options": [
+      "گرم کردن دست قبل از ماساژ",
+      "شستن دست قبل از ماساژ",
+      "چرب کردن دست قبل از ماساژ",
+      "فشار نیاوردن به دست در حین ماساژ"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 218,
+    "question": "مفاصل لقمه‌ای جزء مفاصل گروه .......... هستند.",
+    "options": [
+      "بدون محور",
+      "یک محوره",
+      "دو محوره",
+      "سه محوره"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 219,
+    "question": "مفاصل لقمه‌ای کدام حرکات را حول محور فرونتال انجام می‌دهند؟",
+    "options": [
+      "فلکشن و اداکشن",
+      "اکستنشن و آبداکشن",
+      "اداکشن و آبداکشن",
+      "فلکشن و اکستنشن"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 220,
+    "question": "مفاصل لقمه‌ای کدام حرکات را حول محور ساجیتال انجام می‌دهند؟",
+    "options": [
+      "اکستنشن و آبداکشن",
+      "اداکشن و آبداکشن",
+      "فلکشن و اداکشن",
+      "فلکشن و اکستنشن"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 221,
+    "question": "مفصل زانو یک مفصل .......... است که دو محور آن یکی فرونتال و دیگری ورتیکال است.",
+    "options": [
+      "قرقره‌ای",
+      "لقمه‌ای",
+      "کروی",
+      "زینی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 222,
+    "question": "مفصل بین اولین استخوان کف دست با استخوان ذوزنقه در مچ دست، چه نوع مفصلی است؟",
+    "options": [
+      "قرقره‌ای",
+      "لقمه‌ای",
+      "زینی",
+      "کروی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 223,
+    "question": "مفاصل زینی جزء مفاصل گروه .......... هستند.",
+    "options": [
+      "بدون محور",
+      "یک محوره",
+      "سه محوره",
+      "دو محوره"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 224,
+    "question": "تمرینات بی‌هوازی چه تأثیراتی دارند؟",
+    "options": [
+      "افزایش قدرت و دقت",
+      "افزایش سرعت و استقامت",
+      "افزایش مهارت ورزشی",
+      "افزایش حجم عضله"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 225,
+    "question": "در علم ماساژ، کلمه قدرت چه معنایی دارد؟",
+    "options": [
+      "برتری",
+      "توانایی داشتن",
+      "توانایی انجام اثربخش تکنیک‌ها",
+      "مقدار فشار وارد بر بدن ماساژگیرنده"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 226,
+    "question": "نام دیگر تمرینات هوازی چیست؟",
+    "options": [
+      "ایزوتونیک",
+      "زیر بیشینه",
+      "ایزومتریک",
+      "بیشینه"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 227,
+    "question": "نام دیگر تمرینات بی‌هوازی چیست؟",
+    "options": [
+      "زیر بیشینه",
+      "کششی غیرفعال",
+      "بیشینه",
+      "ایزومتریک"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 228,
+    "question": "کدام نوع مفصل فقط حول محور فرونتال حرکت کرده و حرکات خم شدن و باز شدن را انجام می‌دهد؟",
+    "options": [
+      "لقمه‌ای",
+      "قرقره‌ای",
+      "زینی",
+      "کروی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 229,
+    "question": "مفاصل قرقره‌ای جزء مفاصل گروه .......... هستند.",
+    "options": [
+      "سه محوره",
+      "دو محوره",
+      "یک محوره",
+      "بدون محور"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 230,
+    "question": "کدام مفصل فقط حول یک محور حرکت دارد و موجب حرکت چرخشی (چرخش داخلی و خارجی ساعد) می‌شود؟",
+    "options": [
+      "لقمه‌ای",
+      "کروی",
+      "زینی",
+      "استوانه‌ای"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 231,
+    "question": "کدام مفاصل جزء گروه مفاصل بدون محور می‌باشند؟",
+    "options": [
+      "لقمه‌ای",
+      "استوانه‌ای",
+      "زینی",
+      "مسطح"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 232,
+    "question": "کدام‌یک از موارد زیر عضله صاف تک واحدی است؟",
+    "options": [
+      "عضلات صاف عروق خونی",
+      "راست‌کننده مو",
+      "مجاری صفراوی",
+      "مژگانی چشم"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 233,
+    "question": "........... پیچیده‌ترین و سازمان‌یافته‌ترین دستگاه بدن انسان است.",
+    "options": [
+      "دستگاه عصبی",
+      "دستگاه تنفسی",
+      "دستگاه ادراری",
+      "دستگاه قلبی عروقی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 234,
+    "question": "دستگاه عصبی خودکار از چند بخش تشکیل شده است؟",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 235,
+    "question": "دستگاه عصبی محیطی شامل .......... جفت عصب مغزی و .......... جفت عصب نخاعی می‌باشد.",
+    "options": [
+      "33 ، 15",
+      "15 ، 33",
+      "12 ، 31",
+      "31 ، 12"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 236,
+    "question": "به جسم سلولی نورون‌ها که حاوی هسته و بیشتر ارگان‌ها است، گفته می‌شود.",
+    "options": [
+      "آکسون",
+      "سوما",
+      "دندریت",
+      "قطب آکسونی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 237,
+    "question": "زائده‌ای که از جسم سلولی خارج می‌شود، چه نام دارد؟",
+    "options": [
+      "سوما",
+      "آکسون",
+      "دندریت",
+      "پریکاریون"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 238,
+    "question": "محل خارج شدن آکسون از جسم سلولی را .......... می‌گویند.",
+    "options": [
+      "سوما",
+      "پریکاریون",
+      "دندریت",
+      "قطب آکسونی"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 239,
+    "question": "زائده رشته‌مانندی که به جسم سلولی سلول‌های عصبی (نورون‌ها) متصل است را چه می‌گویند؟",
+    "options": [
+      "دندریت",
+      "سوما",
+      "پریکاریون",
+      "آکسون"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 240,
+    "question": "جنس غلاف میلین چیست؟",
+    "options": [
+      "پروتئین",
+      "چربی",
+      "کربوهیدرات",
+      "همه موارد"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 241,
+    "question": "غضروف چیست؟",
+    "options": [
+      "ماده محکمی است که در سر استخوان‌ها و بین مفاصل و ستون فقرات یافت می‌شود.",
+      "ماده نرمی است که در سر استخوان‌ها و بین مفاصل و ستون فقرات یافت می‌شود.",
+      "مایعی است که بین مفاصل متحرک (سینوویال) یافت می‌شود.",
+      "ماده‌ای است که استخوان‌ها را به یکدیگر وصل می‌کند."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 242,
+    "question": "در میلین موجود روی آکسون، به فاصله‌های مشخص فرورفتگی‌هایی به نام .......... وجود دارد.",
+    "options": [
+      "سوما",
+      "دندریت",
+      "گره رانویه",
+      "پریکاریون"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 243,
+    "question": "محلی را که آکسون یک نورون با نورون بعدی ارتباط عصبی پیدا می‌کند .......... می‌گویند.",
+    "options": [
+      "سیناپس",
+      "دندریت",
+      "پریکاریون",
+      "گره رانویه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 244,
+    "question": "دستگاه عصبی مرکزی توسط پرده‌ای به نام مننژ پوشیده می‌شود که شامل .......... لایه مختلف است.",
+    "options": [
+      "5",
+      "4",
+      "2",
+      "3"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 245,
+    "question": "خارجی‌ترین لایه مننژ را چه می‌نامند؟",
+    "options": [
+      "سیناپس",
+      "سخت‌شامه",
+      "عنکبوتیه",
+      "نرم‌شامه"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 246,
+    "question": "کدام بخش از مغز شامل بصل‌النخاع، پل و مغز میانی می‌باشد؟",
+    "options": [
+      "مخچه",
+      "ساقه مغز",
+      "هیپوتالاموس",
+      "تالاموس"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 247,
+    "question": "تعداد نیمکره‌های مغز چند عدد می‌باشد؟",
+    "options": [
+      "4",
+      "2",
+      "5",
+      "3"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 248,
+    "question": "دستگاه .......... شامل چند غده می‌باشد که ترشحات خود را که هورمون نامیده می‌شوند، به داخل خون می‌ریزند.",
+    "options": [
+      "اندوکرین",
+      "تنفسی",
+      "ادراری",
+      "عصبی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 249,
+    "question": "دستگاه .......... شامل غده هیپوفیز، غده اپی‌فیز، غده تیروئید و پاراتیروئید، غده تیموس، غدد فوق کلیوی و غده لوزالمعده می‌باشد.",
+    "options": [
+      "ادراری",
+      "اندوکرین",
+      "عصبی",
+      "تنفسی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 250,
+    "question": "قلب از چند حفره تشکیل شده است؟",
+    "options": [
+      "4",
+      "5",
+      "2",
+      "3"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 251,
+    "question": "تولید صدا و کمک به ثابت نگهداشتن PH بدن و کمک به حس بویایی از وظایف دستگاه .......... است.",
+    "options": [
+      "لنفاوی",
+      "تنفسی",
+      "اندوکرین",
+      "عصبی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 252,
+    "question": "عضله .......... در ناحیه سطحی بالای پشت قرار داشته و به راحتی بین استخوان کتف و ستون مهره‌ها قابل لمس است.",
+    "options": [
+      "دندانه‌ای بزرگ",
+      "ذوزنقه",
+      "متوازی‌الاضلاع",
+      "گوشه‌ای"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 253,
+    "question": "عضله .......... در زیر استخوان کتف قرار دارد و روی دنده‌ها کشیده شده، به طوری که به زیر عضله سینه‌ای بزرگ می‌رسد.",
+    "options": [
+      "دلتوئید",
+      "دندانه‌ای بزرگ",
+      "گوشه‌ای",
+      "متوازی‌الاضلاع"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 254,
+    "question": "عضله .......... در جلوی سینه و زیر عضله سینه‌ای بزرگ قرار دارد و بنابراین به طور مستقیم قابل لمس شدن نیست.",
+    "options": [
+      "سینه‌ای کوچک",
+      "متوازی‌الاضلاع",
+      "گوشه‌ای",
+      "دندانه‌ای بزرگ"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 255,
+    "question": "کدام مورد دلیل کاهش درد در ماساژ می‌باشد؟",
+    "options": [
+      "وجود اپیوئیدهای درون‌زاد",
+      "نظریه دروازه درد",
+      "وجود اپیوئیدهای درون‌زاد و انتقال‌دهنده‌های عصبی",
+      "وجود اپیوئیدهای درون‌زاد و نظریه دروازه درد"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 256,
+    "question": "پوشش کل عضله چه نام دارد؟",
+    "options": [
+      "اندومیژیوم",
+      "پری‌میزیوم",
+      "اپی‌میزیوم",
+      "میزیوم"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 257,
+    "question": "سطح سهمی بدن کدام گزینه است؟",
+    "options": [
+      "فرونتال",
+      "هوریزنتال",
+      "ساجیتال",
+      "ورتیکال"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 258,
+    "question": "کدام یک از موارد زیر در گروه عوامل زیان‌آور روانی محیط کار قرار می‌گیرد؟",
+    "options": [
+      "دود",
+      "استرس",
+      "پوسچر نامناسب",
+      "سرما"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 259,
+    "question": "سطوح فرضی که بدن انسان یا یک قسمت از بدن را به دو قسمت تقسیم می‌کنند چه نام دارند؟",
+    "options": [
+      "سهمی، عرضی، طولی",
+      "سهمی، عرضی، افقی",
+      "سطحی، عمقی، طولی",
+      "سطحی، عرضی، طولی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 260,
+    "question": "مهم‌ترین حفره‌های بدن کدامند؟",
+    "options": [
+      "جمجمه‌ای، قفسه سینه، مهره‌ای، شکم، لگنی",
+      "حفره فوق خاری، حفره تحت خاری، حفره جمجمه‌ای",
+      "حفره مهره‌ای، حفره فوق خاری، حفره تحت خاری",
+      "حفره قفسه سینه، حفره فوق خاری، حفره تحت خاری"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 261,
+    "question": "تعداد استخوان‌های جمجمه چند عدد است؟",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "5"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 262,
+    "question": "به طور کلی چند سبک ماساژ وجود دارد؟",
+    "options": [
+      "سه نوع: کلاسیک، شرقی، غربی",
+      "دو نوع: شرقی، غربی",
+      "دو نوع: خشک، روغنی",
+      "سه نوع: فشاری، روغنی، کششی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 263,
+    "question": "بر اساس آمارهای کشور آمریکا، سالانه بیش از .......... هزار مورد آسیب و بیماری اسکلتی عضلانی مرتبط با کار ثبت می‌شود.",
+    "options": [
+      "200",
+      "300",
+      "400",
+      "500"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 264,
+    "question": "کدام‌یک از عضلات زیر به دو بخش چناغی و ترقوه‌ای تقسیم می‌شود؟",
+    "options": [
+      "سینه‌ای بزرگ",
+      "سینه‌ای کوچک",
+      "گوشه‌ای",
+      "دندانه‌ای بزرگ"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 265,
+    "question": "علم سنجش ابعاد بدن چیست؟",
+    "options": [
+      "فیزیولوژی",
+      "بیومکانیک",
+      "آناتومی",
+      "آنتروپومتری"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 266,
+    "question": "ضربه به بدن تا چند وقت نباید ماساژ بگیرد؟",
+    "options": [
+      "خفیف: 24 ساعت، متوسط: 48 ساعت، شدید: 72 ساعت",
+      "به طور کلی تا 72 ساعت بهتر است که ماساژ نگیرد",
+      "خفیف: 48 ساعت، متوسط و شدید: 72 ساعت",
+      "خفیف و متوسط: 48 ساعت، شدید: 72 ساعت"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 267,
+    "question": "برای ماساژ کودکان بهتر است از چه روغنی استفاده کنیم؟",
+    "options": [
+      "روغن بچه",
+      "روغن بادام شیرین",
+      "روغن کنجد",
+      "روغن زیتون"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 268,
+    "question": "روغن پایه چه نوع روغنی است؟",
+    "options": [
+      "روغنی است که با روغن‌های دیگر ترکیب می‌شود.",
+      "روغنی است که از گیاه‌ها و دانه‌هایی گرفته می‌شود که ماهیت روغنی دارند.",
+      "روغنی است گیاهی که به صورت دست‌ساز تولید می‌گردد.",
+      "روغنی است که برای ماساژ مناسب بوده و در رایحه‌های مختلف موجود می‌باشد."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 269,
+    "question": ".............. عضله بسیار پهنی که در قسمت پایین پشت قرار دارد و قابل لمس است.",
+    "options": [
+      "دندانه‌ای بزرگ",
+      "پشتی بزرگ",
+      "گوشه‌ای",
+      "دلتوئید"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 270,
+    "question": "بهترین روغن برای ماساژ، کدام یک از روغن‌های زیر می‌باشد؟",
+    "options": [
+      "روغن معدنی",
+      "روغن گیاهی",
+      "روغن حیوانی",
+      "روغن تجاری"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 271,
+    "question": "کدام‌یک از موارد زیر عملکرد عضله پشتی بزرگ را به طور صحیح بیان کرده است؟",
+    "options": [
+      "اداکشن بسیار قوی، اکستنشن و پایین کشیدن کتف",
+      "اداکشن بسیار قوی، اکستنشن و بالا کشیدن کتف",
+      "ابداکشن بسیار قوی، اکستنشن و بالا کشیدن کتف",
+      "ابداکشن بسیار قوی، اکستنشن و پایین کشیدن کتف"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 272,
+    "question": "ماساژ مالشی چه تأثیری بر بدن دارد؟",
+    "options": [
+      "مایع مفصلی درون مفاصل زیاد شده و تونوس عضله بالا می‌رود.",
+      "پرخونی زیرپوستی زیاد شده و تبادلات بهتر صورت می‌گیرد.",
+      "تأثیر زیادی روی سلول‌های چربی زیرپوستی، عضلات، رباط‌ها و مایعات درون مفصلی دارد.",
+      "جهت آماده‌سازی ماساژگیرنده از این تکنیک استفاده می‌شود."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 273,
+    "question": "عضله .......... در سطح بخش خلفی و پایین استخوان کتف قرار گرفته و قابل لمس است.",
+    "options": [
+      "پشتی بزرگ",
+      "دندانه‌ای بزرگ",
+      "گرد بزرگ",
+      "گوشه‌ای"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 274,
+    "question": "کدام یک از روغن‌های زیر در ماساژ ممنوع می‌باشد؟",
+    "options": [
+      "روغن بادام شیرین",
+      "روغن دارچین",
+      "روغن بادام تلخ",
+      "روغن زنجبیل"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 275,
+    "question": "کدام عضله تقریباً مانند عضله پشتی بزرگ عمل می‌نماید و به آن نام کمک‌کننده کوچک پشتی بزرگ لقب داده‌اند؟",
+    "options": [
+      "دلتوئید",
+      "دندانه‌ای بزرگ",
+      "گوشه‌ای",
+      "گرد بزرگ"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 276,
+    "question": "مشخصات روغن خردل کدامند؟",
+    "options": [
+      "روشن، چرب، تلخ و تند و تیز",
+      "روشن، چرب، شیرین، قدرت جذب بالا",
+      "مرطوب‌کننده، روشن، تند و تیز",
+      "تلخ، مرطوب‌کننده، روشن، قدرت جذب بالا"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 277,
+    "question": "کدام دو عضله عمل یکسان داشته و در کنار یکدیگر نیز قرار دارند و باهم مطالعه می‌شوند؟",
+    "options": [
+      "تحت خاری و گرد کوچک",
+      "تحت خاری و گرد بزرگ",
+      "فوق خاری و گرد کوچک",
+      "فوق خاری و گرد بزرگ"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 278,
+    "question": "این گروه از ماساژ، تأثیر زیادی روی سلول‌های چربی زیرپوستی، عضلات، رباط‌ها و مایعات درون مفصلی دارد.",
+    "options": [
+      "ماساژ نوازشی",
+      "ماساژ مالشی",
+      "ماساژ فشاری",
+      "ماساژ مشت و مال"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 279,
+    "question": "کدام گزینه در مورد ماساژ چنگ زدن دایره‌ای صحیح است؟",
+    "options": [
+      "روی عضلات بزرگ مثل بازو، ران و کمر انجام می‌شود.",
+      "روی مفاصل مثل آرنج و شانه انجام می‌شود.",
+      "یکی از روش‌های ماساژ مالشی است.",
+      "یکی از روش‌های مشت و مال است."
+    ],
+    "answer": 3
+  },
+  {
+    "id": 280,
+    "question": "کدام‌یک از عضلات زیر در گروه عضلات چرخش‌دهنده سردستی قرار نمی‌گیرد؟",
+    "options": [
+      "گرد بزرگ",
+      "فوق خاری",
+      "تحت خاری",
+      "تحت کتفی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 281,
+    "question": "گروه عضلات نازک‌نی شامل چند عضله هستند؟",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 282,
+    "question": "عضله .......... در بخش جلویی ساق پا قرار دارد و در قسمت خارجی استخوان درشت‌نی قابل لمس است.",
+    "options": [
+      "دوقلو",
+      "کف‌پایی",
+      "رکبی",
+      "ساقی قدامی"
+    ],
+    "answer": 3
+  },
+  {
+    "id": 283,
+    "question": "کدام عضله به سه دسته قدامی، میانی و خلفی تقسیم می‌شود؟",
+    "options": [
+      "جناقی چنبری پستانی",
+      "ذوزنقه‌ای",
+      "گوشه‌ای",
+      "دوزنقه"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 284,
+    "question": "ماساژ نوازشی مناسب بعد از ماساژ گازانبری، کدام ماساژ است؟",
+    "options": [
+      "مستقیم",
+      "متحدالمرکز",
+      "متناوب",
+      "ترکیبی"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 285,
+    "question": "عضله .......... دارای دو سر ثابت می‌باشد که به بخش خلفی دو برجستگی داخلی و خارجی استخوان ران متصل می‌باشد.",
+    "options": [
+      "کف‌پایی",
+      "رکبی",
+      "دوقلو",
+      "خیاطه"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 286,
+    "question": "گروه عضلات چهار سر ران از چند عضله تشکیل شده است؟",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 287,
+    "question": "کدام مورد درباره ماساژ مالشی صحیح است؟",
+    "options": [
+      "با این ماساژ نوعی آرامش و بی‌حسی در ارگانیسم بدن اتفاق می‌افتد.",
+      "تمام جلسات ماساژ با این گروه از تکنیک‌ها آغاز می‌شود.",
+      "باعث می‌شود که مایع مفصلی درون مفاصل زیاد شود و تونوس عضله بالا برود.",
+      "تأثیر زیادی روی سلول‌های چربی زیرپوستی، عضلات، رباط‌ها و مایعات درون مفصلی دارد."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 288,
+    "question": "گروه عضلات همسترینگ از چند عضله تشکیل شده است؟",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 289,
+    "question": "عضله .......... یک عضله باریک و بلند است که به طور سطحی در بخش داخلی ران قرار گرفته است.",
+    "options": [
+      "راست داخلی",
+      "سوزنی",
+      "خیاطه",
+      "شانه‌ای"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 290,
+    "question": "در این تکنیک، دست را مشت کرده و با برجستگی بند دوم انگشت سبابه روی عضو مراجع از پایین به بالا حرکت کرده، به طوری که این عمل با فشار و لرزش انجام می‌شود.",
+    "options": [
+      "لرزشی تکان دادن",
+      "لرزشی جنباندن",
+      "لرزشی نقطه‌ای",
+      "ضربه‌ای با پاشنه مشت"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 291,
+    "question": "عضله .......... یک عضله کوتاه است که در بالای عضله نزدیک‌کننده بلند و به موازات آن قرار دارد.",
+    "options": [
+      "شانه‌ای",
+      "سوزنی",
+      "راست قدامی",
+      "خیاطه"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 292,
+    "question": "در این تکنیک، دست روی کشکک زانو و دست دیگر روی آن قرار داده می‌شود و زانو را به هر دو جهت به شکل دایره حرکت می‌دهیم.",
+    "options": [
+      "مشت و مال فشاری روی کشکک",
+      "مشت و مال حرکت دادن کشکک",
+      "مشت و مال با پنجه‌های دو دست",
+      "نوازشی ترکیبی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 293,
+    "question": "در ۱۰ تا ۱۵ درصد مردم، حضور عضله .......... را نمی‌توان احساس نمود.",
+    "options": [
+      "کف‌دستی بلند",
+      "برون‌گرداننده کوتاه",
+      "درون‌گرداننده مدور",
+      "سه‌گوش آرنجی"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 294,
+    "question": "در ماساژهای غربی، جهت حرکت دست در ماساژ پا به کدام طرف است؟",
+    "options": [
+      "به سمت انتهای اندام، جهت خروج انرژی منفی",
+      "از پایین به سمت بالا و در جهت غدد لنفاوی و کشاله ران",
+      "از بالا به پایین به سمت غدد لنفاوی پشت زانو",
+      "به سمت ساق پا جهت تخلیه مایع میان‌بافتی"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 295,
+    "question": "برای بیمارانی که عصبی هستند یا نیاز به آرامش بیشتر دارند، ماساژ به چه شیوه‌ای انجام می‌شود؟",
+    "options": [
+      "در قسمت‌هایی که نیاز به تحریک است، به آهستگی انجام می‌دهیم.",
+      "حرکات آهسته و آرام انجام داده شوند و در قسمت‌هایی که نیاز به تحریک است، سریع‌تر انجام شوند.",
+      "حرکات با سرعت و با فشار کم انجام شوند.",
+      "حرکات آهسته و آرام انجام شوند و در قسمت‌هایی که نیاز به تحریک است، آرام انجام شوند."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 296,
+    "question": "در ماساژ غربی، حرکات نوازشی بازو به کدام سمت انجام می‌شود؟",
+    "options": [
+      "به سمت زیر بغل و غدد لنفاوی",
+      "به سمت انتهای انگشتان جهت خروج انرژی منفی",
+      "به سمت پشت آرنج جهت تخلیه لنف",
+      "به صورت عرضی جهت باز شدن عضلات"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 297,
+    "question": "برای مفاصل شانه، زانو، مچ دست و مچ پا، کدام یک از حرکات زیر مناسب است؟",
+    "options": [
+      "متناوب",
+      "بریدن",
+      "یک به چهار",
+      "پایه شست و سبابه"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 298,
+    "question": "کدام مورد از روش‌های ماساژ اطراف اسکاپولا (کتف) می‌باشد؟",
+    "options": [
+      "پشت دست مراجعه‌کننده را روی کمر قرار داده و با دو انگشت به صورت رفت و برگشت، کنار اسکاپولا را ماساژ می‌دهیم.",
+      "با روش ماساژ شانه‌ای، روی اسکاپولا را به صورت رفت و برگشت ماساژ می‌دهیم.",
+      "با روش ماساژ پنجه‌های دو دست، روی اسکاپولا و اطراف آن به شکل رفت و برگشت ماساژ می‌دهیم.",
+      "تحت هیچ شرایطی کنار اسکاپولا را فشاری کار نکرده و فقط از ماساژهای نوازشی استفاده می‌کنیم."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 299,
+    "question": "........... عضله کوچک و سه‌گوشی است که در بالای سطح خلفی ساعد قرار دارد.",
+    "options": [
+      "درون‌گرداننده مدور",
+      "برون‌گرداننده کوتاه",
+      "سه‌گوش آرنجی",
+      "مربع درون‌گرداننده"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 300,
+    "question": "نام دیگر کدام عضله خم‌کننده آرنج است؟",
+    "options": [
+      "سه سر بازو",
+      "تحت کتفی",
+      "غرابی بازویی",
+      "دو سر بازو"
+    ],
+    "answer": 3
+  }
+]
+==============================
+FILE: src/data/courses.json
+==============================
+[
+    {
+      "id": "massage",
+      "title": "کاربر ماساژ",
+      "code": "325530470010001",
+      "description": "آزمون جامع دوره کاربر ماساژ سازمان آموزش فنی و حرفه‌ای کشور",
+      "questionsFile": "massage.json"
+    }
+  ]
+==============================
+FILE: src/pages/Home/Home.tsx
+==============================
+import { Link } from "react-router-dom";
+
+export default function Home() {
+  return (
+    <>
+      <section className="hero">
+        <h2>
+          با آمادگی بیشتر،
+          <br />
+          و اعتماد به نفس بالاتر
+        </h2>
+
+        <p>
+          شبیه ساز آزمون‌های سازمان
+          
+         فنی و حرفه‌ای کشور
+        </p>
+      </section>
+
+      <section className="feature-card">
+
+        <div className="feature-item">
+          <div className="feature-title">
+            <span>آزمون بر اساس نمونه سوالات رسمی</span>
+            <span className="dot"></span>
+          </div>
+
+        </div>
+
+        <div className="feature-item">
+          <div className="feature-title">
+          <span>بررسی پاسخ‌های صحیح و تحلیل عملکرد</span>
+            <span className="dot"></span>
+          </div>
+        </div>
+
+        <div className="feature-item">
+          <div className="feature-title">
+          <span>مشاهده نتیجه بلافاصله پس از پایان آزمون</span>
+            <span className="dot"></span>
+          </div>
+
+        </div>
+
+      </section>
+
+      <Link
+        to="/course/massage"
+        className="primary-btn"
+      >
+        مشاهده آزمون‌ها
+      </Link>
+    </>
+  );
+}
+==============================
+FILE: src/pages/Result/Result.tsx
+==============================
+import { useLocation, useNavigate } from "react-router-dom";
+
+import { remove } from "../../utils/storage";
+
+const STORAGE_KEY = "massage-exam";
+
+type ResultState = {
+  total: number;
+  correct: number;
+  wrong: number;
+  percent: number;
+};
+
+export default function Result() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const result = location.state as ResultState | undefined;
+
+  if (!result) {
+    navigate("/course/massage");
+    return null;
+  }
+
+  const handleRestart = () => {
+    remove(STORAGE_KEY);
+    navigate("/course/massage");
+  };
+
+  return (
+    <div className="page">
+
+      <section className="hero">
+
+        <h2>آزمون به پایان رسید 🎉</h2>
+
+        <p>
+          نتیجه آزمون شما
+        </p>
+
+      </section>
+
+      <section className="feature-card">
+
+        <div className="feature-item">
+          <div className="feature-title">
+            <span>{result.correct} پاسخ صحیح</span>
+            <span className="dot"></span>
+          </div>
+        </div>
+
+        <div className="feature-item">
+          <div className="feature-title">
+            <span>{result.wrong} پاسخ غلط</span>
+            <span className="dot"></span>
+          </div>
+        </div>
+
+        <div className="feature-item">
+          <div className="feature-title">
+            <span>{result.percent}% درصد موفقیت</span>
+            <span className="dot"></span>
+          </div>
+        </div>
+
+      </section>
+
+      <button
+        className="primary-btn"
+        onClick={handleRestart}
+      >
+        شروع مجدد آزمون
+      </button>
+
+    </div>
+  );
+}
+==============================
+FILE: src/pages/Course/Course.tsx
+==============================
+import { Link } from "react-router-dom";
+
+export default function Course() {
+  return (
+    <>
+      <section className="hero">
+  <h2>
+    دوره کاربر ماساژ
+  </h2>
+
+  <p>
+    کد استاندارد: 325530470010001
+  </p>
+
+        <p>
+          آمادگی خود را قبل از آزمون اصلی بسنجید.
+        </p>
+      </section>
+      <section className="feature-card">
+
+<div className="feature-item">
+  <div className="feature-title">
+    <span> ۳۰۰ سوال چهار گزینه‌ای</span>
+    <span className="dot"></span>
+  </div>
+</div>
+
+<div className="feature-item">
+  <div className="feature-title">
+    <span>نمایش پاسخ صحیح پس از هر تست</span>
+    <span className="dot"></span>
+  </div>
+</div>
+
+<div className="feature-item">
+  <div className="feature-title">
+    <span>اعلام نتیجه و درصد کسب شده پس از آزمون</span>
+    <span className="dot"></span>
+  </div>
+</div>
+
+</section>
+
+      <Link
+        to="/exam/massage"
+        className="primary-btn"
+      >
+        شروع آزمون
+      </Link>
+    </>
+  );
+}
+==============================
+FILE: src/pages/Exam/Exam.tsx
+==============================
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import questions from "../../data/massage.json";
+import QuestionCard from "../../components/QuestionCard/QuestionCard";
+
+import { load, remove, save } from "../../utils/storage";
+
+const STORAGE_KEY = "massage-exam";
+
+type ExamState = {
+  currentQuestion: number;
+  score: number;
+  answers: number[];
+};
+
+export default function Exam() {
+  const navigate = useNavigate();
+
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [locked, setLocked] = useState(false);
+
+  const [score, setScore] = useState(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const question = questions[currentQuestion];
+
+  useEffect(() => {
+    const exam = load<ExamState>(STORAGE_KEY);
+
+    if (exam) {
+      const resume = window.confirm(
+        `شما تا سوال ${exam.currentQuestion + 1} پیش رفته‌اید.\n\nآیا می‌خواهید ادامه دهید؟`
+      );
+
+      if (resume) {
+        setCurrentQuestion(exam.currentQuestion);
+        setScore(exam.score);
+        setAnswers(exam.answers);
+      } else {
+        remove(STORAGE_KEY);
+      }
+    }
+
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    save(STORAGE_KEY, {
+      currentQuestion,
+      score,
+      answers,
+    });
+  }, [currentQuestion, score, answers, loaded]);
+
+  const handleSelect = (index: number) => {
+    if (locked) return;
+
+    setSelected(index);
+    setLocked(true);
+
+    const nextAnswers = [...answers];
+    nextAnswers[currentQuestion] = index;
+    setAnswers(nextAnswers);
+
+    const correct = index === question.answer;
+
+    setIsCorrect(correct);
+
+    if (correct) {
+      setScore((prev) => prev + 1);
+    }
+  };
+
+  const handleNext = () => {
+    const finalScore = score;
+
+    if (currentQuestion === questions.length - 1) {
+      remove(STORAGE_KEY);
+
+      navigate("/result", {
+        replace: true,
+        state: {
+          total: questions.length,
+          correct: finalScore,
+          wrong: questions.length - finalScore,
+          percent: Number(
+            ((finalScore / questions.length) * 100).toFixed(2)
+          ),
+        },
+      });
+
+      return;
+    }
+
+    setCurrentQuestion((prev) => prev + 1);
+    setSelected(null);
+    setLocked(false);
+    setIsCorrect(false);
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div className="page">
+      <QuestionCard
+        question={question}
+        current={currentQuestion}
+        total={questions.length}
+        selected={selected}
+        locked={locked}
+        onSelect={handleSelect}
+        onNext={handleNext}
+      />
+    </div>
+  );
+}
+==============================
+FILE: src/router/index.tsx
+==============================
+import { createBrowserRouter } from "react-router-dom";
+
+import Layout from "../components/Layout/Layout";
+
+import Home from "../pages/Home/Home";
+import Course from "../pages/Course/Course";
+import Exam from "../pages/Exam/Exam";
+import Result from "../pages/Result/Result";
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+      {
+        path: "course/:id",
+        element: <Course />,
+      },
+      {
+        path: "exam/:id",
+        element: <Exam />,
+      },
+      {
+        path: "result",
+        element: <Result />,
+      },
+    ],
+  },
+]);
