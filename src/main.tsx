@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import "@fontsource/vazirmatn";
+// import "@fontsource/vazirmatn";
 
 import "./styles/global.css";
 
